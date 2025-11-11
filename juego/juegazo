@@ -1,0 +1,77 @@
+import pygame as p
+p.init() # inicia el 
+ejecutandose= True
+ancho=600
+alto=800
+x=300
+y=650
+velocidad=5
+velocidadB=20
+ventana = p.display.set_mode((ancho, alto))
+
+nave_img = p.image.load("practica5_30_9/recursos/nave.png").convert_alpha()
+nave_img = p.transform.scale(nave_img, (50, 80))
+bala_img = p.image.load("practica5_30_9/recursos/bala.png").convert_alpha()
+bala_img = p.transform.scale(bala_img, (15, 30))
+balas=[]
+
+
+reloj = p.time.Clock()
+
+while ejecutandose:
+    for event in p.event.get(): 
+        if event.type == p.QUIT:
+            ejecutandose = False
+        if event.type == p.KEYDOWN:  # Nueva tecla presionada
+            if event.key == p.K_SPACE:
+                # Crear diccionario con posición de la bala
+                nueva_bala = {"x": x + 17, "y": y}  # +17 para centrarla (50/2 - 15/2)
+                balas.append(nueva_bala)  # Añadir a la lista
+    
+    teclas = p.key.get_pressed()  # Obtienes el estado de todas las teclas
+    
+    if teclas[p.K_LEFT] and not x<5: 
+        x-=velocidad       
+    if teclas[p.K_RIGHT] and not 545<x:  # Miras la posición de la flecha derecha
+        x+=velocidad
+    if teclas[p.K_UP] and not y<550: 
+        y-=velocidad       
+    if teclas[p.K_DOWN] and not 715<y:  # Miras la posición de la flecha derecha
+        y+=velocidad 
+    
+
+    ventana.fill((0, 0, 0)) # borra todo 
+    ventana.blit(nave_img, (x, y))
+    for bala in balas:
+        ventana.blit(bala_img, (bala["x"], bala["y"]))
+    for bala in balas:
+        bala["y"] -= velocidadB
+    # Eliminar balas que salieron de pantalla
+    balas = [bala for bala in balas if bala["y"] > 0]
+    p.display.flip()
+    for event in p.event.get(): 
+        if event.type == p.QUIT:
+            ejecutandose = False
+        if event.type == p.KEYDOWN:  # Nueva tecla presionada
+            if event.key == p.K_SPACE:
+                # Crear diccionario con posición de la bala
+                nueva_bala = {"x": x + 17, "y": y}  # +17 para centrarla (50/2 - 15/2)
+                balas.append(nueva_bala)  # Añadir a la lista
+    reloj.tick(100)
+
+p.quit()
+
+
+#meter balas manteniendo con time para q sea controlado 
+#ver como van los diccionarios de verdad 
+#ponerle hitbox y poner un tringulo en el mapa para ver
+#q se sume una variable tmb q q se escriba el score en la pantalla 
+
+
+
+
+
+
+
+
+
