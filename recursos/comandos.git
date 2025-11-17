@@ -1,0 +1,18 @@
+💻 Cada vez que empieces a trabajar
+
+Abre la terminal en VS Code (Ctrl + ñ).
+
+Actualiza tu copia local:
+
+git pull
+
+
+Trae los últimos cambios del repositorio remoto (GitHub).
+
+✍️ Cuando termines de programar algo
+
+Guarda tus archivos y ejecuta:
+
+git add .
+git commit -m "Descripción breve del cambio"
+git push
