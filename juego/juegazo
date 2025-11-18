@@ -9,9 +9,9 @@ velocidad=5
 velocidadB=20
 ventana = p.display.set_mode((ancho, alto))
 
-nave_img = p.image.load("practica5_30_9/recursos/nave.png").convert_alpha()
+nave_img = p.image.load("recursos/nave.png").convert_alpha()
 nave_img = p.transform.scale(nave_img, (50, 80))
-bala_img = p.image.load("practica5_30_9/recursos/bala.png").convert_alpha()
+bala_img = p.image.load("recursos/bala.png").convert_alpha()
 bala_img = p.transform.scale(bala_img, (15, 30))
 balas=[]
 
