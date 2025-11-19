@@ -1,77 +1,151 @@
 import pygame as p
-p.init() # inicia el 
-ejecutandose= True
-ancho=600
-alto=800
-x=300
-y=650
-velocidad=5
-velocidadB=20
+
+# ============================================================================
+# INICIALIZACIÓN DE PYGAME
+# ============================================================================
+p.init()
+
+# ============================================================================
+# VARIABLES GLOBALES Y CONFIGURACIÓN
+# ============================================================================
+ejecutandose = True
+ancho = 600
+alto = 800
+
+# Posición inicial de la nave
+x = 300
+y = 650
+
+# Velocidades
+velocidad = 5        # Velocidad de movimiento de la nave
+velocidadB = 20      # Velocidad de las balas
+
+# Puntuación
+score = 0
+
+# ============================================================================
+# CONFIGURACIÓN DE VENTANA
+# ============================================================================
 ventana = p.display.set_mode((ancho, alto))
 
+# ============================================================================
+# CARGA Y PREPARACIÓN DE RECURSOS
+# ============================================================================
+# Imágenes
 nave_img = p.image.load("recursos/nave.png").convert_alpha()
 nave_img = p.transform.scale(nave_img, (50, 80))
+
 bala_img = p.image.load("recursos/bala.png").convert_alpha()
 bala_img = p.transform.scale(bala_img, (15, 30))
-balas=[]
 
+# Fuentes
+fuente = p.font.Font(None, 36)  # None = fuente por defecto, 36 = tamaño
 
+# ============================================================================
+# LISTAS DE OBJETOS DEL JUEGO
+# ============================================================================
+balas = []  # Lista que almacena todas las balas activas
+
+# ============================================================================
+# ENEMIGOS
+# ============================================================================
+enemigo = {
+    "x": 300,
+    "y": 100,
+    "ancho": 60,
+    "alto": 60
+}
+
+# ============================================================================
+# RELOJ PARA CONTROLAR FPS
+# ============================================================================
 reloj = p.time.Clock()
 
+# ============================================================================
+# BUCLE PRINCIPAL DEL JUEGO
+# ============================================================================
 while ejecutandose:
+    
+    # ------------------------------------------------------------------------
+    # MANEJO DE EVENTOS
+    # ------------------------------------------------------------------------
     for event in p.event.get(): 
         if event.type == p.QUIT:
             ejecutandose = False
-        if event.type == p.KEYDOWN:  # Nueva tecla presionada
+        
+        # Disparo de balas (solo cuando se presiona ESPACIO, no al mantenerlo)
+        if event.type == p.KEYDOWN:
             if event.key == p.K_SPACE:
-                # Crear diccionario con posición de la bala
-                nueva_bala = {"x": x + 17, "y": y}  # +17 para centrarla (50/2 - 15/2)
-                balas.append(nueva_bala)  # Añadir a la lista
+                nueva_bala = {"x": x + 17, "y": y}  # +17 centra la bala en la nave
+                balas.append(nueva_bala)
     
-    teclas = p.key.get_pressed()  # Obtienes el estado de todas las teclas
+    # ------------------------------------------------------------------------
+    # DETECCIÓN DE TECLAS MANTENIDAS (Movimiento continuo)
+    # ------------------------------------------------------------------------
+    teclas = p.key.get_pressed()
     
-    if teclas[p.K_LEFT] and not x<5: 
-        x-=velocidad       
-    if teclas[p.K_RIGHT] and not 545<x:  # Miras la posición de la flecha derecha
-        x+=velocidad
-    if teclas[p.K_UP] and not y<550: 
-        y-=velocidad       
-    if teclas[p.K_DOWN] and not 715<y:  # Miras la posición de la flecha derecha
-        y+=velocidad 
+    if teclas[p.K_LEFT] and not x < 5: 
+        x -= velocidad       
+    if teclas[p.K_RIGHT] and not 545 < x:
+        x += velocidad
+    if teclas[p.K_UP] and not y < 550: 
+        y -= velocidad       
+    if teclas[p.K_DOWN] and not 715 < y:
+        y += velocidad 
     
-
-    ventana.fill((0, 0, 0)) # borra todo 
-    ventana.blit(nave_img, (x, y))
-    for bala in balas:
-        ventana.blit(bala_img, (bala["x"], bala["y"]))
+    # ------------------------------------------------------------------------
+    # ACTUALIZACIÓN DE OBJETOS
+    # ------------------------------------------------------------------------
+    # Movimiento de balas
     for bala in balas:
         bala["y"] -= velocidadB
+    
     # Eliminar balas que salieron de pantalla
     balas = [bala for bala in balas if bala["y"] > 0]
+    
+    # ------------------------------------------------------------------------
+    # HITBOXES (rectángulos de colisión)
+    # ------------------------------------------------------------------------
+    enemigo_rect = p.Rect(enemigo["x"], enemigo["y"], enemigo["ancho"], enemigo["alto"])
+    
+    # ------------------------------------------------------------------------
+    # DETECCIÓN DE COLISIONES
+    # ------------------------------------------------------------------------
+    # Colisión bala-enemigo
+    for bala in balas[:]:  # [:] crea copia para evitar errores al eliminar
+        bala_rect = p.Rect(bala["x"], bala["y"], 15, 30)
+        if bala_rect.colliderect(enemigo_rect):
+            score += 1
+            balas.remove(bala)
+    
+    # ------------------------------------------------------------------------
+    # RENDERIZADO (Dibujar todo en pantalla)
+    # ------------------------------------------------------------------------
+    ventana.fill((0, 0, 0))  # Limpia la pantalla (fondo negro)
+    
+    # Dibujar nave
+    ventana.blit(nave_img, (x, y))
+    
+    # Dibujar enemigo
+    p.draw.rect(ventana, (255, 0, 0), (enemigo["x"], enemigo["y"], enemigo["ancho"], enemigo["alto"]))
+    
+    # Dibujar todas las balas
+    for bala in balas:
+        ventana.blit(bala_img, (bala["x"], bala["y"]))
+    
+    # Dibujar interfaz (Score)
+    texto_score = fuente.render(f"Score: {score}", True, (255, 255, 255))
+    ventana.blit(texto_score, (10, 10))
+    
+    # Actualizar pantalla
     p.display.flip()
-    for event in p.event.get(): 
-        if event.type == p.QUIT:
-            ejecutandose = False
-        if event.type == p.KEYDOWN:  # Nueva tecla presionada
-            if event.key == p.K_SPACE:
-                # Crear diccionario con posición de la bala
-                nueva_bala = {"x": x + 17, "y": y}  # +17 para centrarla (50/2 - 15/2)
-                balas.append(nueva_bala)  # Añadir a la lista
-    reloj.tick(100)
+    
+    # ------------------------------------------------------------------------
+    # CONTROL DE FPS
+    # ------------------------------------------------------------------------
+    reloj.tick(100)  # Limita a 100 FPS
 
+# ============================================================================
+# CIERRE DEL JUEGO
+# ============================================================================
 p.quit()
-
-
-#meter balas manteniendo con time para q sea controlado 
-#ver como van los diccionarios de verdad 
-#ponerle hitbox y poner un tringulo en el mapa para ver
-#q se sume una variable tmb q q se escriba el score en la pantalla 
-
-
-
-
-
-
-
-
-
