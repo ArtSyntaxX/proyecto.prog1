@@ -32,7 +32,7 @@ ventana = p.display.set_mode((ancho, alto))
 # CARGA Y PREPARACIÓN DE RECURSOS
 # ============================================================================
 # Imágenes
-nave_img = p.image.load("recursos/nave.png").convert_alpha()
+nave_img = p.image.load("recursos/ship5.png").convert_alpha()
 nave_img = p.transform.scale(nave_img, (50, 80))
 
 bala_img = p.image.load("recursos/bala.png").convert_alpha()

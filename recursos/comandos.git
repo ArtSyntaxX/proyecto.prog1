@@ -70,7 +70,7 @@ python nombre_del_archivo.py
 ✅ 5. Mini-tabla con comandos de Git muy básicos (lo que usaréis mañana)
 | **Acción**                          | **Comando**               | **Para qué sirve**                  |
 | ----------------------------------- | ------------------------- | ----------------------------------- |
-| Descargar el proyecto               | `git clone URL`           | Trae el código desde GitHub         |
+| Descargar el proyecto               | `git clone https://github.com/ArtSyntaxX/proyecto.prog1`           | Trae el código desde GitHub         |
 | Ver cambios                         | `git status`              | Muestra qué archivos han cambiado   |
 | Añadir cambios                      | `git add .`               | Marca los cambios para subir        |
 | Guardar cambios localmente          | `git commit -m "mensaje"` | Crea una versión en tu PC           |
