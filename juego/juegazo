@@ -16,6 +16,10 @@ alto = 800
 x = 300
 y = 650
 
+# Vida de la nave
+vida_nave = 5
+vida_nave_maxima = 5
+
 # Velocidades
 velocidad = 5        # Velocidad de movimiento de la nave
 velocidadB = 20      # Velocidad de las balas
@@ -41,6 +45,15 @@ bala_img = p.transform.scale(bala_img, (15, 30))
 # Fuentes
 fuente = p.font.Font(None, 36)  # None = fuente por defecto, 36 = tamaño
 
+# Animación de explosión
+explosion_imgs = []  # Lista para guardar los frames
+for i in range(1, 6):  # Del 1 al 4
+    img = p.image.load(f"recursos/explosion/exp2_0{i}.png").convert_alpha()
+    img = p.transform.scale(img, (70, 70))  # Ajusta el tamaño
+    explosion_imgs.append(img)
+
+explosiones = []  # Lista de explosiones en curso
+
 # ============================================================================
 # LISTAS DE OBJETOS DEL JUEGO
 # ============================================================================
@@ -53,7 +66,9 @@ enemigo = {
     "x": 300,
     "y": 100,
     "ancho": 60,
-    "alto": 60
+    "alto": 60,
+    "vida": 3,           
+    "vida_maxima": 3 
 }
 
 # ============================================================================
@@ -102,7 +117,20 @@ while ejecutandose:
     
     # Eliminar balas que salieron de pantalla
     balas = [bala for bala in balas if bala["y"] > 0]
-    
+
+    # Actualización de explosiones
+    for explosion in explosiones[:]:
+        explosion["contador_frames"] += 1
+        
+        # Cambiar de frame cada 5 iteraciones del bucle (ajusta para más lento/rápido)
+        if explosion["contador_frames"] >= 10:
+            explosion["contador_frames"] = 0
+            explosion["frame_actual"] += 1
+        
+        # Si llegó al último frame, eliminar la explosión
+        if explosion["frame_actual"] >= len(explosion_imgs):
+            explosiones.remove(explosion)
+        
     # ------------------------------------------------------------------------
     # HITBOXES (rectángulos de colisión)
     # ------------------------------------------------------------------------
@@ -115,8 +143,24 @@ while ejecutandose:
     for bala in balas[:]:  # [:] crea copia para evitar errores al eliminar
         bala_rect = p.Rect(bala["x"], bala["y"], 15, 30)
         if bala_rect.colliderect(enemigo_rect):
-            score += 1
+            enemigo["vida"] -= 1
             balas.remove(bala)
+
+            if enemigo["vida"] <= 0:
+                score += 10
+                # Crear explosión
+                nueva_explosion = {
+                    "x": enemigo["x"],
+                    "y": enemigo["y"],
+                    "frame_actual": 0,      # Empieza en frame 0
+                    "contador_frames": 0    # Contador para controlar velocidad
+                }
+                explosiones.append(nueva_explosion)
+                
+                # Reiniciar enemigo (o eliminarlo, tú decides)
+                enemigo["x"] = 300
+                enemigo["y"] = 100
+                enemigo["vida"] = 3
     
     # ------------------------------------------------------------------------
     # RENDERIZADO (Dibujar todo en pantalla)
@@ -128,6 +172,11 @@ while ejecutandose:
     
     # Dibujar enemigo
     p.draw.rect(ventana, (255, 0, 0), (enemigo["x"], enemigo["y"], enemigo["ancho"], enemigo["alto"]))
+
+    # Dibujar explosiones
+    for explosion in explosiones:
+        ventana.blit(explosion_imgs[explosion["frame_actual"]], 
+                    (explosion["x"], explosion["y"]))
     
     # Dibujar todas las balas
     for bala in balas:
@@ -136,6 +185,14 @@ while ejecutandose:
     # Dibujar interfaz (Score)
     texto_score = fuente.render(f"Score: {score}", True, (255, 255, 255))
     ventana.blit(texto_score, (10, 10))
+    
+    # Dibujar vida de la nave
+    texto_vida = fuente.render(f"Vida: {vida_nave}/{vida_nave_maxima}", True, (0, 255, 0))
+    ventana.blit(texto_vida, (10, 50))
+
+    # Dibujar vida del enemigo (opcional, para debug)
+    texto_vida_enemigo = fuente.render(f"Enemigo: {enemigo['vida']}", True, (255, 0, 0))
+    ventana.blit(texto_vida_enemigo, (10, 90))
     
     # Actualizar pantalla
     p.display.flip()
