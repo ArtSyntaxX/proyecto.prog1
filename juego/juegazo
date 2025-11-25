@@ -24,6 +24,9 @@ estado_juego = "start"  # start, seleccion_nivel, jugando, gameover, nivel_compl
 nave_elegida = 0
 bala_elegida = 0
 
+# Pantalla inventario
+pantalla_inventario = False
+
 # ============================================================================
 # CARGA DE RECURSOS
 # ============================================================================
@@ -39,7 +42,7 @@ balas_disponibles = [
     {"nombre": "Bala 2", "archivo": "recursos/bala2.png"}
 ]
 
-# Cargar imágenes de naves y balas **una sola vez**
+# Cargar imágenes de naves y balas una vez
 naves_imgs = []
 for nave in naves_disponibles:
     img = p.image.load(nave["archivo"]).convert_alpha()
@@ -52,7 +55,7 @@ for bala in balas_disponibles:
     img = p.transform.scale(img, (15, 30))
     balas_imgs.append(img)
 
-# Cargar imagen inicial según selección por defecto
+# Inicial
 nave_img = naves_imgs[nave_elegida]
 bala_img = balas_imgs[bala_elegida]
 
@@ -109,7 +112,7 @@ velocidad_bala_enemigo = 7
 
 def reiniciar_juego():
     global x, y, vida_nave, score, balas, balas_enemigo, nivel_actual, enemigo, estado_juego
-    global nave_elegida, bala_elegida, nave_img, bala_img
+    global nave_elegida, bala_elegida, nave_img, bala_img, pantalla_inventario
     x, y = 300, 650
     vida_nave = vida_nave_maxima
     score = 0
@@ -119,12 +122,12 @@ def reiniciar_juego():
     enemigo["vida"] = niveles[nivel_actual]["vida"]
     enemigo["vida_maxima"] = niveles[nivel_actual]["vida"]
     enemigo["x"], enemigo["y"] = 300, 100
-    # Reiniciar selección a por defecto
     nave_elegida = 0
     bala_elegida = 0
     nave_img = naves_imgs[nave_elegida]
     bala_img = balas_imgs[bala_elegida]
     estado_juego = "start"
+    pantalla_inventario = False
 
 def siguiente_nivel():
     global nivel_actual, enemigo, estado_juego
@@ -138,7 +141,8 @@ def siguiente_nivel():
         estado_juego = "jugando"
 
 def manejar_eventos():
-    global balas, estado_juego, nave_elegida, bala_elegida, nave_img, bala_img, nivel_actual
+    global balas, estado_juego, nave_elegida, bala_elegida, nave_img, bala_img
+    global nivel_actual, pantalla_inventario
     for event in p.event.get():
         if event.type == p.QUIT:
             p.quit()
@@ -147,34 +151,43 @@ def manejar_eventos():
         if estado_juego == "start":
             if event.type == p.KEYDOWN and event.key == p.K_RETURN:
                 estado_juego = "seleccion_nivel"
-        # SELECCION
+        # SELECCION NIVEL / INVENTARIO
         elif estado_juego == "seleccion_nivel":
             if event.type == p.MOUSEBUTTONDOWN:
                 mouse_pos = event.pos
-                # Selección de nivel
-                for i in range(5):
-                    rect = p.Rect(100 + i*90, 350, 70, 70)
-                    if rect.collidepoint(mouse_pos):
-                        nivel_actual = i+1
-                        enemigo["vida"] = niveles[nivel_actual]["vida"]
-                        enemigo["vida_maxima"] = niveles[nivel_actual]["vida"]
-                        enemigo["x"], enemigo["y"] = 300, 100
-                # Selección de nave
-                for i in range(len(naves_disponibles)):
-                    rect = p.Rect(100 + i*150, 500, 100, 80)
-                    if rect.collidepoint(mouse_pos):
-                        nave_elegida = i
-                        nave_img = naves_imgs[nave_elegida]
-                # Selección de bala
-                for i in range(len(balas_disponibles)):
-                    rect = p.Rect(150 + i*150, 620, 50, 50)
-                    if rect.collidepoint(mouse_pos):
-                        bala_elegida = i
-                        bala_img = balas_imgs[bala_elegida]
-                # Botón JUGAR
-                rect_jugar = p.Rect(ancho//2-75, 700, 150, 50)
-                if rect_jugar.collidepoint(mouse_pos):
-                    estado_juego = "jugando"
+                if not pantalla_inventario:
+                    # Selección de nivel
+                    for i in range(5):
+                        rect = p.Rect(100 + i*90, 250, 70, 70)
+                        if rect.collidepoint(mouse_pos):
+                            nivel_actual = i+1
+                            enemigo["vida"] = niveles[nivel_actual]["vida"]
+                            enemigo["vida_maxima"] = niveles[nivel_actual]["vida"]
+                            enemigo["x"], enemigo["y"] = 300, 100
+                    # Botón INVENTARIO
+                    rect_inventario = p.Rect(ancho//2-75, 450, 150, 50)
+                    if rect_inventario.collidepoint(mouse_pos):
+                        pantalla_inventario = True
+                    # Botón JUGAR
+                    rect_jugar = p.Rect(ancho//2-75, 550, 150, 50)
+                    if rect_jugar.collidepoint(mouse_pos):
+                        estado_juego = "jugando"
+                else:
+                    # Selección nave/bala
+                    for i in range(len(naves_disponibles)):
+                        rect = p.Rect(100 + i*150, 200, 100, 80)
+                        if rect.collidepoint(mouse_pos):
+                            nave_elegida = i
+                            nave_img = naves_imgs[nave_elegida]
+                    for i in range(len(balas_disponibles)):
+                        rect = p.Rect(150 + i*150, 320, 50, 50)
+                        if rect.collidepoint(mouse_pos):
+                            bala_elegida = i
+                            bala_img = balas_imgs[bala_elegida]
+                    # Botón VOLVER
+                    rect_volver = p.Rect(ancho//2-75, 420, 150, 50)
+                    if rect_volver.collidepoint(mouse_pos):
+                        pantalla_inventario = False
         # JUGANDO
         elif estado_juego == "jugando":
             if event.type == p.KEYDOWN and event.key == p.K_SPACE:
@@ -259,33 +272,51 @@ def dibujar_pantalla():
         ventana.blit(texto, (ancho//2 - texto.get_width()//2, alto//2 - 50))
         ventana.blit(subtitulo, (ancho//2 - subtitulo.get_width()//2, alto//2 + 50))
     elif estado_juego == "seleccion_nivel":
-        # Título
-        texto = fuente_grande.render("Selecciona Nivel/Nave/Bala", True, (0,255,255))
-        ventana.blit(texto, (ancho//2 - texto.get_width()//2, 100))
-        # Niveles
-        for i in range(5):
-            rect = p.Rect(100 + i*90, 350, 70, 70)
-            color = (0,200,0) if nivel_actual == i+1 else (255,0,0)
-            p.draw.rect(ventana, color, rect)
-            num = fuente.render(str(i+1), True, (255,255,255))
-            ventana.blit(num, (rect.x + rect.width//2 - num.get_width()//2, rect.y + rect.height//2 - num.get_height()//2))
-        # Naves
-        for i, img in enumerate(naves_imgs):
-            rect = p.Rect(100 + i*150, 500, 100, 80)
-            color = (0,200,0) if nave_elegida==i else (255,255,255)
-            p.draw.rect(ventana, color, rect, 2)
-            ventana.blit(img, (rect.x + rect.width//2 - img.get_width()//2, rect.y))
-        # Balas
-        for i, img in enumerate(balas_imgs):
-            rect = p.Rect(150 + i*150, 620, 50, 50)
-            color = (0,200,0) if bala_elegida==i else (255,255,255)
-            p.draw.rect(ventana, color, rect, 2)
-            ventana.blit(img, (rect.x + rect.width//2 - img.get_width()//2, rect.y + 10))
-        # Botón jugar
-        rect_jugar = p.Rect(ancho//2-75, 700, 150, 50)
-        p.draw.rect(ventana, (0,0,255), rect_jugar)
-        texto_jugar = fuente.render("JUGAR", True, (255,255,255))
-        ventana.blit(texto_jugar, (rect_jugar.x + rect_jugar.width//2 - texto_jugar.get_width()//2, rect_jugar.y + rect_jugar.height//2 - texto_jugar.get_height()//2))
+        if not pantalla_inventario:
+            # Título
+            texto = fuente_grande.render("Selecciona Nivel", True, (0,255,255))
+            ventana.blit(texto, (ancho//2 - texto.get_width()//2, 100))
+            # Niveles
+            for i in range(5):
+                rect = p.Rect(100 + i*90, 250, 70, 70)
+                color = (0,200,0) if nivel_actual == i+1 else (255,0,0)
+                p.draw.rect(ventana, color, rect)
+                num = fuente.render(str(i+1), True, (255,255,255))
+                ventana.blit(num, (rect.x + rect.width//2 - num.get_width()//2, rect.y + rect.height//2 - num.get_height()//2))
+            # Botón INVENTARIO
+            rect_inventario = p.Rect(ancho//2-75, 450, 150, 50)
+            p.draw.rect(ventana, (0,0,255), rect_inventario)
+            texto_inv = fuente.render("INVENTARIO", True, (255,255,255))
+            ventana.blit(texto_inv, (rect_inventario.x + rect_inventario.width//2 - texto_inv.get_width()//2,
+                                      rect_inventario.y + rect_inventario.height//2 - texto_inv.get_height()//2))
+            # Botón JUGAR
+            rect_jugar = p.Rect(ancho//2-75, 550, 150, 50)
+            p.draw.rect(ventana, (0,255,0), rect_jugar)
+            texto_jugar = fuente.render("JUGAR", True, (255,255,255))
+            ventana.blit(texto_jugar, (rect_jugar.x + rect_jugar.width//2 - texto_jugar.get_width()//2,
+                                        rect_jugar.y + rect_jugar.height//2 - texto_jugar.get_height()//2))
+        else:
+            # Inventario
+            texto_inv = fuente_grande.render("Inventario", True, (0,255,255))
+            ventana.blit(texto_inv, (ancho//2 - texto_inv.get_width()//2, 100))
+            # Naves
+            for i, img in enumerate(naves_imgs):
+                rect = p.Rect(100 + i*150, 200, 100, 80)
+                color = (0,200,0) if nave_elegida==i else (255,255,255)
+                p.draw.rect(ventana, color, rect, 2)
+                ventana.blit(img, (rect.x + rect.width//2 - img.get_width()//2, rect.y))
+            # Balas
+            for i, img in enumerate(balas_imgs):
+                rect = p.Rect(150 + i*150, 320, 50, 50)
+                color = (0,200,0) if bala_elegida==i else (255,255,255)
+                p.draw.rect(ventana, color, rect, 2)
+                ventana.blit(img, (rect.x + rect.width//2 - img.get_width()//2, rect.y + 10))
+            # Botón VOLVER
+            rect_volver = p.Rect(ancho//2-75, 420, 150, 50)
+            p.draw.rect(ventana, (255,0,0), rect_volver)
+            texto_volver = fuente.render("VOLVER", True, (255,255,255))
+            ventana.blit(texto_volver, (rect_volver.x + rect_volver.width//2 - texto_volver.get_width()//2,
+                                         rect_volver.y + rect_volver.height//2 - texto_volver.get_height()//2))
     elif estado_juego == "jugando":
         ventana.blit(nave_img, (x,y))
         ventana.blit(boss_img, (enemigo["x"], enemigo["y"]))
@@ -332,6 +363,6 @@ def main():
             actualizar_explosiones()
             detectar_colisiones()
         dibujar_pantalla()
-        reloj.tick(100)
+        reloj.tick(60)
 
 main()
