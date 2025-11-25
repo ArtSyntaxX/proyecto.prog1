@@ -20,6 +20,20 @@ class Menu:
         color = AMARILLO if seleccionada else BLANCO
         prefijo = "► " if seleccionada else "  "
         self.dibujar_texto_centrado(prefijo + texto, FUENTE_MENU, color, y)
+    
+    def dibujar_cuadricula_fondo(self):
+        """Dibuja una cuadrícula de fondo"""
+        tamaño_grid = 50
+        
+        for x in range(0, ANCHO, tamaño_grid):
+            p.draw.line(self.ventana, GRIS_OSCURO, (x, 0), (x, ALTO), 1)
+        
+        for y in range(0, ALTO, tamaño_grid):
+            p.draw.line(self.ventana, GRIS_OSCURO, (0, y), (ANCHO, y), 1)
+    
+    def dibujar_borde_decorativo(self, x, y, ancho, alto):
+        """Dibuja un borde decorativo"""
+        p.draw.rect(self.ventana, CIAN, (x, y, ancho, alto), 2)
 
 
 class MenuInicio(Menu):
@@ -54,22 +68,31 @@ class MenuInicio(Menu):
     
     def dibujar(self):
         """Dibuja el menú de inicio"""
-        self.ventana.fill(NEGRO)
+        self.ventana.fill(FONDO_OSCURO)
+        self.dibujar_cuadricula_fondo()
         
         # Título
-        self.dibujar_texto_centrado("SPACE SHOOTER", FUENTE_TITULO, AZUL, 100)
-        self.dibujar_texto_centrado("MENÚ PRINCIPAL", FUENTE_MENU, VERDE, 180)
+        self.dibujar_texto_centrado("SPACE SHOOTER", FUENTE_TITULO, AZUL, 80)
+        self.dibujar_texto_centrado("MENÚ PRINCIPAL", FUENTE_MENU, VERDE, 160)
         
-        # Opciones
+        # Opciones con recuadro
         y_inicio = 280
-        espaciado = 80
+        espaciado = 90
+        ancho_caja = 500
         
         for i, opcion in enumerate(self.opciones):
-            self.dibujar_opcion(opcion, y_inicio + i * espaciado, i == self.opcion_seleccionada)
+            y_opcion = y_inicio + i * espaciado
+            
+            # Fondo de opción seleccionada
+            if i == self.opcion_seleccionada:
+                p.draw.rect(self.ventana, GRIS_OSCURO, (50, y_opcion - 30, ancho_caja, 60))
+                p.draw.rect(self.ventana, CIAN, (50, y_opcion - 30, ancho_caja, 60), 2)
+            
+            self.dibujar_opcion(opcion, y_opcion, i == self.opcion_seleccionada)
         
         # Instrucciones
         self.dibujar_texto_centrado("TAB/↑↓: Navegar  |  ENTER: Seleccionar", 
-                                   FUENTE_TEXTO, BLANCO, 720)
+                                   FUENTE_PEQUEÑA, BLANCO, ALTO - 40)
         
         p.display.flip()
 
@@ -110,22 +133,31 @@ class MenuNiveles(Menu):
     
     def dibujar(self):
         """Dibuja el menú de selección de niveles"""
-        self.ventana.fill(NEGRO)
+        self.ventana.fill(FONDO_OSCURO)
+        self.dibujar_cuadricula_fondo()
         
         # Títulos
-        self.dibujar_texto_centrado("SPACE SHOOTER", FUENTE_TITULO, AZUL, 50)
-        self.dibujar_texto_centrado("SELECCIONA UN NIVEL", FUENTE_MENU, VERDE, 130)
+        self.dibujar_texto_centrado("SPACE SHOOTER", FUENTE_TITULO, AZUL, 40)
+        self.dibujar_texto_centrado("SELECCIONA UN NIVEL", FUENTE_MENU, VERDE, 120)
         
-        # Opciones
+        # Opciones con recuadro
         y_inicio = 200
-        espaciado = 80
+        espaciado = 100
+        ancho_caja = 500
         
         for i, opcion in enumerate(self.opciones):
-            self.dibujar_opcion(opcion, y_inicio + i * espaciado, i == self.opcion_seleccionada)
+            y_opcion = y_inicio + i * espaciado
+            
+            # Fondo de opción seleccionada
+            if i == self.opcion_seleccionada:
+                p.draw.rect(self.ventana, GRIS_OSCURO, (50, y_opcion - 30, ancho_caja, 60))
+                p.draw.rect(self.ventana, CIAN, (50, y_opcion - 30, ancho_caja, 60), 2)
+            
+            self.dibujar_opcion(opcion, y_opcion, i == self.opcion_seleccionada)
         
         # Instrucciones
         self.dibujar_texto_centrado("TAB/↑↓: Navegar  |  ENTER: Seleccionar  |  ESC: Volver", 
-                                   FUENTE_TEXTO, BLANCO, 720)
+                                   FUENTE_PEQUEÑA, BLANCO, ALTO - 40)
         
         p.display.flip()
 
@@ -187,12 +219,17 @@ class MenuVestuario(Menu):
     
     def dibujar(self):
         """Dibuja el menú de vestuario"""
-        self.ventana.fill(NEGRO)
+        self.ventana.fill(FONDO_OSCURO)
+        self.dibujar_cuadricula_fondo()
+        
+        y_inicio = 220
+        espaciado = 100
+        ancho_caja = 500
         
         if self.fase == "nave":
             # Títulos
-            self.dibujar_texto_centrado("SPACE SHOOTER", FUENTE_TITULO, AZUL, 50)
-            self.dibujar_texto_centrado("ELIGE TU NAVE", FUENTE_MENU, VERDE, 130)
+            self.dibujar_texto_centrado("SPACE SHOOTER", FUENTE_TITULO, AZUL, 40)
+            self.dibujar_texto_centrado("ELIGE TU NAVE", FUENTE_MENU, VERDE, 120)
             
             opciones = [
                 f"Nave 1 - {NAVES[1]['nombre']} (Velocidad: {NAVES[1]['velocidad']})",
@@ -201,20 +238,24 @@ class MenuVestuario(Menu):
                 "◄ Volver al Menú Principal"
             ]
             
-            y_inicio = 220
-            espaciado = 90
-            
             for i, opcion in enumerate(opciones):
-                self.dibujar_opcion(opcion, y_inicio + i * espaciado, i == self.opcion_seleccionada)
+                y_opcion = y_inicio + i * espaciado
+                
+                # Fondo de opción seleccionada
+                if i == self.opcion_seleccionada:
+                    p.draw.rect(self.ventana, GRIS_OSCURO, (50, y_opcion - 30, ancho_caja, 60))
+                    p.draw.rect(self.ventana, CIAN, (50, y_opcion - 30, ancho_caja, 60), 2)
+                
+                self.dibujar_opcion(opcion, y_opcion, i == self.opcion_seleccionada)
         
         else:  # fase == "bala"
             # Títulos
-            self.dibujar_texto_centrado("SPACE SHOOTER", FUENTE_TITULO, AZUL, 50)
-            self.dibujar_texto_centrado("ELIGE TUS BALAS", FUENTE_MENU, ROJO, 130)
+            self.dibujar_texto_centrado("SPACE SHOOTER", FUENTE_TITULO, AZUL, 40)
+            self.dibujar_texto_centrado("ELIGE TUS BALAS", FUENTE_MENU, ROJO, 120)
             
             # Info nave seleccionada
             nave_info = f"Nave: {NAVES[self.nave_seleccionada]['nombre']}"
-            self.dibujar_texto_centrado(nave_info, FUENTE_TEXTO, VERDE, 200)
+            self.dibujar_texto_centrado(nave_info, FUENTE_PEQUEÑA, VERDE, 180)
             
             opciones = [
                 f"Balas 1 - {BALAS[1]['nombre']} (Daño: {BALAS[1]['daño']})",
@@ -223,14 +264,18 @@ class MenuVestuario(Menu):
                 "◄ Volver a Elegir Nave"
             ]
             
-            y_inicio = 270
-            espaciado = 90
-            
             for i, opcion in enumerate(opciones):
-                self.dibujar_opcion(opcion, y_inicio + i * espaciado, i == self.opcion_seleccionada)
+                y_opcion = y_inicio + i * espaciado
+                
+                # Fondo de opción seleccionada
+                if i == self.opcion_seleccionada:
+                    p.draw.rect(self.ventana, GRIS_OSCURO, (50, y_opcion - 30, ancho_caja, 60))
+                    p.draw.rect(self.ventana, CIAN, (50, y_opcion - 30, ancho_caja, 60), 2)
+                
+                self.dibujar_opcion(opcion, y_opcion, i == self.opcion_seleccionada)
         
         # Instrucciones
         self.dibujar_texto_centrado("TAB/↑↓: Navegar  |  ENTER: Seleccionar  |  ESC: Volver", 
-                                   FUENTE_TEXTO, BLANCO, 720)
+                                   FUENTE_PEQUEÑA, BLANCO, ALTO - 40)
         
         p.display.flip()
