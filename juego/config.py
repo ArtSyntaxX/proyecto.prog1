@@ -27,7 +27,6 @@ FUENTE_MENU = p.font.Font(None, 48)
 FUENTE_TEXTO = p.font.Font(None, 36)
 
 # Configuración de naves
-# añadir naves 
 NAVES = {
     1: {"sprite": "recursos/ship5.png", "nombre": "Básica", "velocidad": 5},
     2: {"sprite": "recursos/ship5.png", "nombre": "Rápida", "velocidad": 7},
@@ -36,14 +35,16 @@ NAVES = {
 
 # Configuración de balas
 BALAS = {
-    1: {"sprite": "recursos/bala.png", "nombre": "Normal", "daño": 1,"velocidadB":8},
-    2: {"sprite": "recursos/bala.png", "nombre": "Potente", "daño": 2,"velocidadB":6},
-    3: {"sprite": "recursos/bala.png", "nombre": "Explosiva", "daño": 3,"velocidadB":4}
+    1: {"sprite": "recursos/bala.png", "nombre": "Normal", "daño": 1, "velocidadB": 8},
+    2: {"sprite": "recursos/bala.png", "nombre": "Potente", "daño": 2, "velocidadB": 6},
+    3: {"sprite": "recursos/bala.png", "nombre": "Explosiva", "daño": 3, "velocidadB": 4}
 }
 
-# Niveles
+# Niveles (5 niveles)
 NIVELES = {
-    1: {"nombre": "Fácil", "enemigos": 3, "vida_enemigo": 3},
-    2: {"nombre": "Normal", "enemigos": 5, "vida_enemigo": 5},
-    3: {"nombre": "Difícil", "enemigos": 8, "vida_enemigo": 7}
+    1: {"nombre": "Muy Fácil", "enemigos": 2, "vida_enemigo": 2},
+    2: {"nombre": "Fácil", "enemigos": 3, "vida_enemigo": 3},
+    3: {"nombre": "Normal", "enemigos": 5, "vida_enemigo": 5},
+    4: {"nombre": "Difícil", "enemigos": 8, "vida_enemigo": 7},
+    5: {"nombre": "Muy Difícil", "enemigos": 10, "vida_enemigo": 10}
 }
