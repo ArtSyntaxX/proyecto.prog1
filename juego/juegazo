@@ -1,48 +1,74 @@
 import pygame as p
 
 # ============================================================================
-# INICIALIZACIÓN DE PYGAME
+# INICIALIZACIÓN
 # ============================================================================
 p.init()
+ancho, alto = 600, 800
+ventana = p.display.set_mode((ancho, alto))
+p.display.set_caption("Mi Juego Espacial")
 
 # ============================================================================
-# VARIABLES GLOBALES Y CONFIGURACIÓN
+# VARIABLES GLOBALES
 # ============================================================================
-ejecutandose = True
-ancho = 600
-alto = 800
-
-# Posición inicial de la nave
-x = 300
-y = 650
-
-# Vida de la nave
+x, y = 300, 650
 vida_nave = 5
 vida_nave_maxima = 5
-
-# Velocidades
-velocidad = 5        
-velocidadB = 20      
-
-# Puntuación
+velocidad = 5
+velocidadB = 20
 score = 0
+nivel_actual = 1
+estado_juego = "start"  # start, seleccion_nivel, jugando, gameover, nivel_completado, final
+
+# Índices de selección de nave y bala
+nave_elegida = 0
+bala_elegida = 0
 
 # ============================================================================
-# CONFIGURACIÓN DE VENTANA
+# CARGA DE RECURSOS
 # ============================================================================
-ventana = p.display.set_mode((ancho, alto))
+# Naves disponibles
+naves_disponibles = [
+    {"nombre": "Nave 1", "archivo": "recursos/ship5.png"},
+    {"nombre": "Nave 2", "archivo": "recursos/ship6.png"}
+]
 
-# ============================================================================
-# CARGA Y PREPARACIÓN DE RECURSOS
-# ============================================================================
-nave_img = p.image.load("recursos/ship5.png").convert_alpha()
-nave_img = p.transform.scale(nave_img, (50, 80))
+# Balas disponibles
+balas_disponibles = [
+    {"nombre": "Bala 1", "archivo": "recursos/bala.png"},
+    {"nombre": "Bala 2", "archivo": "recursos/bala2.png"}
+]
 
-bala_img = p.image.load("recursos/bala.png").convert_alpha()
-bala_img = p.transform.scale(bala_img, (15, 30))
+# Cargar imágenes de naves y balas **una sola vez**
+naves_imgs = []
+for nave in naves_disponibles:
+    img = p.image.load(nave["archivo"]).convert_alpha()
+    img = p.transform.scale(img, (50, 80))
+    naves_imgs.append(img)
 
+balas_imgs = []
+for bala in balas_disponibles:
+    img = p.image.load(bala["archivo"]).convert_alpha()
+    img = p.transform.scale(img, (15, 30))
+    balas_imgs.append(img)
+
+# Cargar imagen inicial según selección por defecto
+nave_img = naves_imgs[nave_elegida]
+bala_img = balas_imgs[bala_elegida]
+
+# Boss
+boss_img = p.image.load("recursos/enemigos/boss1.png").convert_alpha()
+boss_img = p.transform.scale(boss_img, (80, 80))
+
+# Bala enemigo
+bala_enemigo_img = p.image.load("recursos/enemigos/balaenemigo1.png").convert_alpha()
+bala_enemigo_img = p.transform.scale(bala_enemigo_img, (20, 40))
+
+# Fuentes
 fuente = p.font.Font(None, 36)
+fuente_grande = p.font.Font(None, 72)
 
+# Explosiones
 explosion_imgs = []
 for i in range(1, 6):
     img = p.image.load(f"recursos/explosion/exp2_0{i}.png").convert_alpha()
@@ -50,45 +76,117 @@ for i in range(1, 6):
     explosion_imgs.append(img)
 
 explosiones = []
-
-# ============================================================================
-# LISTAS DE OBJETOS DEL JUEGO
-# ============================================================================
 balas = []
+balas_enemigo = []
 
 # ============================================================================
-# ENEMIGO
+# NIVELES
 # ============================================================================
+niveles = {
+    1: {"vida": 3, "velocidad": 3, "intervalo": 50},
+    2: {"vida": 5, "velocidad": 4, "intervalo": 45},
+    3: {"vida": 7, "velocidad": 5, "intervalo": 40},
+    4: {"vida": 10, "velocidad": 6, "intervalo": 35},
+    5: {"vida": 15, "velocidad": 7, "intervalo": 30},
+}
+
 enemigo = {
     "x": 300,
     "y": 100,
-    "ancho": 60,
-    "alto": 60,
-    "vida": 3,
-    "vida_maxima": 3 
+    "ancho": 80,
+    "alto": 80,
+    "vida": niveles[nivel_actual]["vida"],
+    "vida_maxima": niveles[nivel_actual]["vida"]
 }
 
+direccion_enemigo = 1
+contador_disparo_enemigo = 0
+velocidad_bala_enemigo = 7
+
 # ============================================================================
-# MANEJO DE EVENTOS
+# FUNCIONES
 # ============================================================================
+
+def reiniciar_juego():
+    global x, y, vida_nave, score, balas, balas_enemigo, nivel_actual, enemigo, estado_juego
+    global nave_elegida, bala_elegida, nave_img, bala_img
+    x, y = 300, 650
+    vida_nave = vida_nave_maxima
+    score = 0
+    balas.clear()
+    balas_enemigo.clear()
+    nivel_actual = 1
+    enemigo["vida"] = niveles[nivel_actual]["vida"]
+    enemigo["vida_maxima"] = niveles[nivel_actual]["vida"]
+    enemigo["x"], enemigo["y"] = 300, 100
+    # Reiniciar selección a por defecto
+    nave_elegida = 0
+    bala_elegida = 0
+    nave_img = naves_imgs[nave_elegida]
+    bala_img = balas_imgs[bala_elegida]
+    estado_juego = "start"
+
+def siguiente_nivel():
+    global nivel_actual, enemigo, estado_juego
+    nivel_actual += 1
+    if nivel_actual > 5:
+        estado_juego = "final"
+    else:
+        enemigo["vida"] = niveles[nivel_actual]["vida"]
+        enemigo["vida_maxima"] = niveles[nivel_actual]["vida"]
+        enemigo["x"], enemigo["y"] = 300, 100
+        estado_juego = "jugando"
+
 def manejar_eventos():
-    global ejecutandose, balas
-
-    for event in p.event.get(): 
+    global balas, estado_juego, nave_elegida, bala_elegida, nave_img, bala_img, nivel_actual
+    for event in p.event.get():
         if event.type == p.QUIT:
-            ejecutandose = False
-        
-        if event.type == p.KEYDOWN and event.key == p.K_SPACE:
-            nueva_bala = {"x": x + 17, "y": y}
-            balas.append(nueva_bala)
+            p.quit()
+            exit()
+        # START
+        if estado_juego == "start":
+            if event.type == p.KEYDOWN and event.key == p.K_RETURN:
+                estado_juego = "seleccion_nivel"
+        # SELECCION
+        elif estado_juego == "seleccion_nivel":
+            if event.type == p.MOUSEBUTTONDOWN:
+                mouse_pos = event.pos
+                # Selección de nivel
+                for i in range(5):
+                    rect = p.Rect(100 + i*90, 350, 70, 70)
+                    if rect.collidepoint(mouse_pos):
+                        nivel_actual = i+1
+                        enemigo["vida"] = niveles[nivel_actual]["vida"]
+                        enemigo["vida_maxima"] = niveles[nivel_actual]["vida"]
+                        enemigo["x"], enemigo["y"] = 300, 100
+                # Selección de nave
+                for i in range(len(naves_disponibles)):
+                    rect = p.Rect(100 + i*150, 500, 100, 80)
+                    if rect.collidepoint(mouse_pos):
+                        nave_elegida = i
+                        nave_img = naves_imgs[nave_elegida]
+                # Selección de bala
+                for i in range(len(balas_disponibles)):
+                    rect = p.Rect(150 + i*150, 620, 50, 50)
+                    if rect.collidepoint(mouse_pos):
+                        bala_elegida = i
+                        bala_img = balas_imgs[bala_elegida]
+                # Botón JUGAR
+                rect_jugar = p.Rect(ancho//2-75, 700, 150, 50)
+                if rect_jugar.collidepoint(mouse_pos):
+                    estado_juego = "jugando"
+        # JUGANDO
+        elif estado_juego == "jugando":
+            if event.type == p.KEYDOWN and event.key == p.K_SPACE:
+                balas.append({"x": x + 17, "y": y})
+        # FIN
+        elif estado_juego in ["gameover", "nivel_completado", "final"]:
+            if event.type == p.KEYDOWN and event.key == p.K_RETURN:
+                reiniciar_juego()
 
-# ============================================================================
-# MOVIMIENTO DE LA NAVE
-# ============================================================================
 def mover_nave():
     global x, y
     teclas = p.key.get_pressed()
-    
     if teclas[p.K_LEFT] and x > 5:
         x -= velocidad       
     if teclas[p.K_RIGHT] and x < 545:
@@ -98,98 +196,142 @@ def mover_nave():
     if teclas[p.K_DOWN] and y < 715:
         y += velocidad 
 
-# ============================================================================
-# MOVIMIENTO Y LIMPIEZA DE BALAS
-# ============================================================================
+def mover_enemigo():
+    global direccion_enemigo
+    vel = niveles[nivel_actual]["velocidad"]
+    enemigo["x"] += vel * direccion_enemigo
+    if enemigo["x"] <= 0 or enemigo["x"] + enemigo["ancho"] >= ancho:
+        direccion_enemigo *= -1
+
+def disparo_enemigo():
+    global contador_disparo_enemigo
+    intervalo = niveles[nivel_actual]["intervalo"]
+    contador_disparo_enemigo += 1
+    if contador_disparo_enemigo >= intervalo:
+        contador_disparo_enemigo = 0
+        balas_enemigo.append({"x": enemigo["x"] + enemigo["ancho"]//2 - 10,
+                              "y": enemigo["y"] + enemigo["alto"]})
+
 def mover_balas():
     global balas
-
     for bala in balas:
         bala["y"] -= velocidadB
-    
     balas = [b for b in balas if b["y"] > 0]
 
-# ============================================================================
-# ACTUALIZACIÓN DE EXPLOSIONES
-# ============================================================================
+def mover_balas_enemigo():
+    global balas_enemigo
+    for bala in balas_enemigo:
+        bala["y"] += velocidad_bala_enemigo
+    balas_enemigo = [b for b in balas_enemigo if b["y"] < alto]
+
 def actualizar_explosiones():
     for explosion in explosiones[:]:
         explosion["contador_frames"] += 1
-        
         if explosion["contador_frames"] >= 10:
             explosion["contador_frames"] = 0
             explosion["frame_actual"] += 1
-        
         if explosion["frame_actual"] >= len(explosion_imgs):
             explosiones.remove(explosion)
 
-# ============================================================================
-# COLISIONES
-# ============================================================================
 def detectar_colisiones():
-    global score
+    global score, vida_nave, estado_juego
     enemigo_rect = p.Rect(enemigo["x"], enemigo["y"], enemigo["ancho"], enemigo["alto"])
-
+    nave_rect = p.Rect(x, y, 50, 80)
     for bala in balas[:]:
-        bala_rect = p.Rect(bala["x"], bala["y"], 15, 30)
-        if bala_rect.colliderect(enemigo_rect):
+        if p.Rect(bala["x"], bala["y"], 15, 30).colliderect(enemigo_rect):
             enemigo["vida"] -= 1
             balas.remove(bala)
-
             if enemigo["vida"] <= 0:
-                score += 10
+                estado_juego = "nivel_completado"
+                explosiones.append({"x": enemigo["x"], "y": enemigo["y"], "frame_actual": 0, "contador_frames": 0})
+    for bala in balas_enemigo[:]:
+        if p.Rect(bala["x"], bala["y"], 20, 40).colliderect(nave_rect):
+            balas_enemigo.remove(bala)
+            vida_nave -= 1
+            if vida_nave <= 0:
+                estado_juego = "gameover"
 
-                nueva_explosion = {
-                    "x": enemigo["x"],
-                    "y": enemigo["y"],
-                    "frame_actual": 0,
-                    "contador_frames": 0
-                }
-                explosiones.append(nueva_explosion)
-                
-                enemigo["x"] = 300
-                enemigo["y"] = 100
-                enemigo["vida"] = enemigo["vida_maxima"]
-
-# ============================================================================
-# DIBUJADO EN PANTALLA
-# ============================================================================
 def dibujar_pantalla():
-    ventana.fill((0, 0, 0))
-    
-    ventana.blit(nave_img, (x, y))
-    p.draw.rect(ventana, (255, 0, 0), (enemigo["x"], enemigo["y"], enemigo["ancho"], enemigo["alto"]))
-
-    for explosion in explosiones:
-        ventana.blit(explosion_imgs[explosion["frame_actual"]],
-                     (explosion["x"], explosion["y"]))
-    
-    for bala in balas:
-        ventana.blit(bala_img, (bala["x"], bala["y"]))
-
-    ventana.blit(fuente.render(f"Score: {score}", True, (255, 255, 255)), (10, 10))
-    ventana.blit(fuente.render(f"Vida: {vida_nave}/{vida_nave_maxima}", True, (0, 255, 0)), (10, 50))
-    ventana.blit(fuente.render(f"Enemigo: {enemigo['vida']}", True, (255, 0, 0)), (10, 90))
-
+    ventana.fill((0,0,0))
+    if estado_juego == "start":
+        texto = fuente_grande.render("MI JUEGO", True, (0,255,0))
+        subtitulo = fuente.render("Presiona ENTER para comenzar", True, (255,255,255))
+        ventana.blit(texto, (ancho//2 - texto.get_width()//2, alto//2 - 50))
+        ventana.blit(subtitulo, (ancho//2 - subtitulo.get_width()//2, alto//2 + 50))
+    elif estado_juego == "seleccion_nivel":
+        # Título
+        texto = fuente_grande.render("Selecciona Nivel/Nave/Bala", True, (0,255,255))
+        ventana.blit(texto, (ancho//2 - texto.get_width()//2, 100))
+        # Niveles
+        for i in range(5):
+            rect = p.Rect(100 + i*90, 350, 70, 70)
+            color = (0,200,0) if nivel_actual == i+1 else (255,0,0)
+            p.draw.rect(ventana, color, rect)
+            num = fuente.render(str(i+1), True, (255,255,255))
+            ventana.blit(num, (rect.x + rect.width//2 - num.get_width()//2, rect.y + rect.height//2 - num.get_height()//2))
+        # Naves
+        for i, img in enumerate(naves_imgs):
+            rect = p.Rect(100 + i*150, 500, 100, 80)
+            color = (0,200,0) if nave_elegida==i else (255,255,255)
+            p.draw.rect(ventana, color, rect, 2)
+            ventana.blit(img, (rect.x + rect.width//2 - img.get_width()//2, rect.y))
+        # Balas
+        for i, img in enumerate(balas_imgs):
+            rect = p.Rect(150 + i*150, 620, 50, 50)
+            color = (0,200,0) if bala_elegida==i else (255,255,255)
+            p.draw.rect(ventana, color, rect, 2)
+            ventana.blit(img, (rect.x + rect.width//2 - img.get_width()//2, rect.y + 10))
+        # Botón jugar
+        rect_jugar = p.Rect(ancho//2-75, 700, 150, 50)
+        p.draw.rect(ventana, (0,0,255), rect_jugar)
+        texto_jugar = fuente.render("JUGAR", True, (255,255,255))
+        ventana.blit(texto_jugar, (rect_jugar.x + rect_jugar.width//2 - texto_jugar.get_width()//2, rect_jugar.y + rect_jugar.height//2 - texto_jugar.get_height()//2))
+    elif estado_juego == "jugando":
+        ventana.blit(nave_img, (x,y))
+        ventana.blit(boss_img, (enemigo["x"], enemigo["y"]))
+        for explosion in explosiones:
+            ventana.blit(explosion_imgs[explosion["frame_actual"]], (explosion["x"], explosion["y"]))
+        for bala in balas:
+            ventana.blit(bala_img, (bala["x"], bala["y"]))
+        for bala in balas_enemigo:
+            ventana.blit(bala_enemigo_img, (bala["x"], bala["y"]))
+        ventana.blit(fuente.render(f"Score: {score}", True, (255,255,255)), (10,10))
+        ventana.blit(fuente.render(f"Vida: {vida_nave}/{vida_nave_maxima}", True, (0,255,0)), (10,50))
+        ventana.blit(fuente.render(f"Nivel: {nivel_actual}", True, (255,255,0)), (10,90))
+        ventana.blit(fuente.render(f"Enemigo: {enemigo['vida']}", True, (255,0,0)), (10,130))
+    elif estado_juego == "gameover":
+        texto = fuente_grande.render("GAME OVER", True, (255,0,0))
+        subtitulo = fuente.render("Presiona ENTER para reiniciar", True, (255,255,255))
+        ventana.blit(texto, (ancho//2 - texto.get_width()//2, alto//2 - 50))
+        ventana.blit(subtitulo, (ancho//2 - subtitulo.get_width()//2, alto//2 + 50))
+    elif estado_juego == "nivel_completado":
+        texto = fuente_grande.render(f"Nivel {nivel_actual} completado!", True, (0,255,0))
+        subtitulo = fuente.render("Presiona ENTER para siguiente nivel", True, (255,255,255))
+        ventana.blit(texto, (ancho//2 - texto.get_width()//2, alto//2 - 50))
+        ventana.blit(subtitulo, (ancho//2 - subtitulo.get_width()//2, alto//2 + 50))
+    elif estado_juego == "final":
+        texto = fuente_grande.render("¡FELICITACIONES!", True, (0,255,0))
+        subtitulo = fuente.render("Presiona ENTER para reiniciar", True, (255,255,255))
+        ventana.blit(texto, (ancho//2 - texto.get_width()//2, alto//2 - 50))
+        ventana.blit(subtitulo, (ancho//2 - subtitulo.get_width()//2, alto//2 + 50))
     p.display.flip()
 
 # ============================================================================
-# FUNCIÓN PRINCIPAL
+# BUCLE PRINCIPAL
 # ============================================================================
 def main():
-    global ejecutandose
     reloj = p.time.Clock()
-
-    while ejecutandose:
+    while p.get_init():
         manejar_eventos()
-        mover_nave()
-        mover_balas()
-        actualizar_explosiones()
-        detectar_colisiones()
+        if estado_juego == "jugando":
+            mover_nave()
+            mover_enemigo()
+            mover_balas()
+            disparo_enemigo()
+            mover_balas_enemigo()
+            actualizar_explosiones()
+            detectar_colisiones()
         dibujar_pantalla()
-
         reloj.tick(100)
-
-    p.quit()
 
 main()
