@@ -21,8 +21,8 @@ vida_nave = 5
 vida_nave_maxima = 5
 
 # Velocidades
-velocidad = 5        # Velocidad de movimiento de la nave
-velocidadB = 20      # Velocidad de las balas
+velocidad = 5        
+velocidadB = 20      
 
 # Puntuación
 score = 0
@@ -35,112 +35,102 @@ ventana = p.display.set_mode((ancho, alto))
 # ============================================================================
 # CARGA Y PREPARACIÓN DE RECURSOS
 # ============================================================================
-# Imágenes
 nave_img = p.image.load("recursos/ship5.png").convert_alpha()
 nave_img = p.transform.scale(nave_img, (50, 80))
 
 bala_img = p.image.load("recursos/bala.png").convert_alpha()
 bala_img = p.transform.scale(bala_img, (15, 30))
 
-# Fuentes
-fuente = p.font.Font(None, 36)  # None = fuente por defecto, 36 = tamaño
+fuente = p.font.Font(None, 36)
 
-# Animación de explosión
-explosion_imgs = []  # Lista para guardar los frames
-for i in range(1, 6):  # Del 1 al 4
+explosion_imgs = []
+for i in range(1, 6):
     img = p.image.load(f"recursos/explosion/exp2_0{i}.png").convert_alpha()
-    img = p.transform.scale(img, (70, 70))  # Ajusta el tamaño
+    img = p.transform.scale(img, (70, 70))
     explosion_imgs.append(img)
 
-explosiones = []  # Lista de explosiones en curso
+explosiones = []
 
 # ============================================================================
 # LISTAS DE OBJETOS DEL JUEGO
 # ============================================================================
-balas = []  # Lista que almacena todas las balas activas
+balas = []
 
 # ============================================================================
-# ENEMIGOS
+# ENEMIGO
 # ============================================================================
 enemigo = {
     "x": 300,
     "y": 100,
     "ancho": 60,
     "alto": 60,
-    "vida": 3,           
+    "vida": 3,
     "vida_maxima": 3 
 }
 
 # ============================================================================
-# RELOJ PARA CONTROLAR FPS
+# MANEJO DE EVENTOS
 # ============================================================================
-reloj = p.time.Clock()
+def manejar_eventos():
+    global ejecutandose, balas
 
-# ============================================================================
-# BUCLE PRINCIPAL DEL JUEGO
-# ============================================================================
-while ejecutandose:
-    
-    # ------------------------------------------------------------------------
-    # MANEJO DE EVENTOS
-    # ------------------------------------------------------------------------
     for event in p.event.get(): 
         if event.type == p.QUIT:
             ejecutandose = False
         
-        # Disparo de balas (solo cuando se presiona ESPACIO, no al mantenerlo)
-        if event.type == p.KEYDOWN:
-            if event.key == p.K_SPACE:
-                nueva_bala = {"x": x + 17, "y": y}  # +17 centra la bala en la nave
-                balas.append(nueva_bala)
-    
-    # ------------------------------------------------------------------------
-    # DETECCIÓN DE TECLAS MANTENIDAS (Movimiento continuo)
-    # ------------------------------------------------------------------------
+        if event.type == p.KEYDOWN and event.key == p.K_SPACE:
+            nueva_bala = {"x": x + 17, "y": y}
+            balas.append(nueva_bala)
+
+# ============================================================================
+# MOVIMIENTO DE LA NAVE
+# ============================================================================
+def mover_nave():
+    global x, y
     teclas = p.key.get_pressed()
     
-    if teclas[p.K_LEFT] and not x < 5: 
+    if teclas[p.K_LEFT] and x > 5:
         x -= velocidad       
-    if teclas[p.K_RIGHT] and not 545 < x:
+    if teclas[p.K_RIGHT] and x < 545:
         x += velocidad
-    if teclas[p.K_UP] and not y < 550: 
+    if teclas[p.K_UP] and y > 550: 
         y -= velocidad       
-    if teclas[p.K_DOWN] and not 715 < y:
+    if teclas[p.K_DOWN] and y < 715:
         y += velocidad 
-    
-    # ------------------------------------------------------------------------
-    # ACTUALIZACIÓN DE OBJETOS
-    # ------------------------------------------------------------------------
-    # Movimiento de balas
+
+# ============================================================================
+# MOVIMIENTO Y LIMPIEZA DE BALAS
+# ============================================================================
+def mover_balas():
+    global balas
+
     for bala in balas:
         bala["y"] -= velocidadB
     
-    # Eliminar balas que salieron de pantalla
-    balas = [bala for bala in balas if bala["y"] > 0]
+    balas = [b for b in balas if b["y"] > 0]
 
-    # Actualización de explosiones
+# ============================================================================
+# ACTUALIZACIÓN DE EXPLOSIONES
+# ============================================================================
+def actualizar_explosiones():
     for explosion in explosiones[:]:
         explosion["contador_frames"] += 1
         
-        # Cambiar de frame cada 5 iteraciones del bucle (ajusta para más lento/rápido)
         if explosion["contador_frames"] >= 10:
             explosion["contador_frames"] = 0
             explosion["frame_actual"] += 1
         
-        # Si llegó al último frame, eliminar la explosión
         if explosion["frame_actual"] >= len(explosion_imgs):
             explosiones.remove(explosion)
-        
-    # ------------------------------------------------------------------------
-    # HITBOXES (rectángulos de colisión)
-    # ------------------------------------------------------------------------
+
+# ============================================================================
+# COLISIONES
+# ============================================================================
+def detectar_colisiones():
+    global score
     enemigo_rect = p.Rect(enemigo["x"], enemigo["y"], enemigo["ancho"], enemigo["alto"])
-    
-    # ------------------------------------------------------------------------
-    # DETECCIÓN DE COLISIONES
-    # ------------------------------------------------------------------------
-    # Colisión bala-enemigo
-    for bala in balas[:]:  # [:] crea copia para evitar errores al eliminar
+
+    for bala in balas[:]:
         bala_rect = p.Rect(bala["x"], bala["y"], 15, 30)
         if bala_rect.colliderect(enemigo_rect):
             enemigo["vida"] -= 1
@@ -148,61 +138,58 @@ while ejecutandose:
 
             if enemigo["vida"] <= 0:
                 score += 10
-                # Crear explosión
+
                 nueva_explosion = {
                     "x": enemigo["x"],
                     "y": enemigo["y"],
-                    "frame_actual": 0,      # Empieza en frame 0
-                    "contador_frames": 0    # Contador para controlar velocidad
+                    "frame_actual": 0,
+                    "contador_frames": 0
                 }
                 explosiones.append(nueva_explosion)
                 
-                # Reiniciar enemigo (o eliminarlo, tú decides)
                 enemigo["x"] = 300
                 enemigo["y"] = 100
-                enemigo["vida"] = 3
+                enemigo["vida"] = enemigo["vida_maxima"]
+
+# ============================================================================
+# DIBUJADO EN PANTALLA
+# ============================================================================
+def dibujar_pantalla():
+    ventana.fill((0, 0, 0))
     
-    # ------------------------------------------------------------------------
-    # RENDERIZADO (Dibujar todo en pantalla)
-    # ------------------------------------------------------------------------
-    ventana.fill((0, 0, 0))  # Limpia la pantalla (fondo negro)
-    
-    # Dibujar nave
     ventana.blit(nave_img, (x, y))
-    
-    # Dibujar enemigo
     p.draw.rect(ventana, (255, 0, 0), (enemigo["x"], enemigo["y"], enemigo["ancho"], enemigo["alto"]))
 
-    # Dibujar explosiones
     for explosion in explosiones:
-        ventana.blit(explosion_imgs[explosion["frame_actual"]], 
-                    (explosion["x"], explosion["y"]))
+        ventana.blit(explosion_imgs[explosion["frame_actual"]],
+                     (explosion["x"], explosion["y"]))
     
-    # Dibujar todas las balas
     for bala in balas:
         ventana.blit(bala_img, (bala["x"], bala["y"]))
-    
-    # Dibujar interfaz (Score)
-    texto_score = fuente.render(f"Score: {score}", True, (255, 255, 255))
-    ventana.blit(texto_score, (10, 10))
-    
-    # Dibujar vida de la nave
-    texto_vida = fuente.render(f"Vida: {vida_nave}/{vida_nave_maxima}", True, (0, 255, 0))
-    ventana.blit(texto_vida, (10, 50))
 
-    # Dibujar vida del enemigo (opcional, para debug)
-    texto_vida_enemigo = fuente.render(f"Enemigo: {enemigo['vida']}", True, (255, 0, 0))
-    ventana.blit(texto_vida_enemigo, (10, 90))
-    
-    # Actualizar pantalla
+    ventana.blit(fuente.render(f"Score: {score}", True, (255, 255, 255)), (10, 10))
+    ventana.blit(fuente.render(f"Vida: {vida_nave}/{vida_nave_maxima}", True, (0, 255, 0)), (10, 50))
+    ventana.blit(fuente.render(f"Enemigo: {enemigo['vida']}", True, (255, 0, 0)), (10, 90))
+
     p.display.flip()
-    
-    # ------------------------------------------------------------------------
-    # CONTROL DE FPS
-    # ------------------------------------------------------------------------
-    reloj.tick(100)  # Limita a 100 FPS
 
 # ============================================================================
-# CIERRE DEL JUEGO
+# FUNCIÓN PRINCIPAL
 # ============================================================================
-p.quit()
+def main():
+    global ejecutandose
+    reloj = p.time.Clock()
+
+    while ejecutandose:
+        manejar_eventos()
+        mover_nave()
+        mover_balas()
+        actualizar_explosiones()
+        detectar_colisiones()
+        dibujar_pantalla()
+
+        reloj.tick(100)
+
+    p.quit()
+
+main()
