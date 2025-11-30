@@ -12,6 +12,8 @@ class Juego:
         self.nivel = nivel
         self.nave_tipo = nave_tipo
         self.bala_tipo = bala_tipo
+        self.fondo = p.image.load(FONDOS_NIVELES[nivel])
+        self.fondo = p.transform.scale(self.fondo, (ANCHO, ALTO))
         
         # Configuración del nivel
         self.config_nivel = NIVELES[nivel]
@@ -270,8 +272,9 @@ class Juego:
     
     def dibujar(self):
         """Dibuja todos los elementos del juego"""
-        # Fondo
-        self.ventana.fill(FONDO_OSCURO)
+        # Dibujar fondo del nivel
+        self.ventana.blit(self.fondo, (0, 0))
+
         
         # Cuadrícula de fondo
         self.dibujar_cuadricula()

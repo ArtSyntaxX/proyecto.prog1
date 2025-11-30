@@ -37,11 +37,16 @@ class Menu:
 
 
 class MenuInicio(Menu):
+
+
     """Menú principal con opciones START, VESTUARIO y QUIT"""
     def __init__(self, ventana):
         super().__init__(ventana)
         self.opciones = ["START - Elegir Nivel", "VESTUARIO - Naves y Balas", "QUIT - Salir"]
         self.opcion_seleccionada = 0
+
+        self.fondo = p.image.load(FONDO_START)
+        self.fondo = p.transform.scale(self.fondo, (ANCHO, ALTO))
     
     def manejar_eventos(self):
         """Maneja eventos del menú inicio"""
@@ -68,7 +73,7 @@ class MenuInicio(Menu):
     
     def dibujar(self):
         """Dibuja el menú de inicio"""
-        self.ventana.fill(FONDO_OSCURO)
+        self.ventana.blit(self.fondo, (0, 0))
         self.dibujar_cuadricula_fondo()
         
         # Título
@@ -105,6 +110,8 @@ class MenuNiveles(Menu):
         self.opciones = [f"Nivel {i} - {NIVELES[i]['nombre']}" for i in range(1, 6)]
         self.opciones.append("◄ Volver al Menú Principal")
         self.opcion_seleccionada = 0
+        self.fondo = p.image.load(FONDO_NIVELES)
+        self.fondo = p.transform.scale(self.fondo, (ANCHO, ALTO))
     
     def manejar_eventos(self):
         """Maneja eventos del menú de niveles"""
@@ -133,7 +140,7 @@ class MenuNiveles(Menu):
     
     def dibujar(self):
         """Dibuja el menú de selección de niveles"""
-        self.ventana.fill(FONDO_OSCURO)
+        self.ventana.blit(self.fondo, (0, 0))
         self.dibujar_cuadricula_fondo()
         
         # Títulos
@@ -170,6 +177,8 @@ class MenuVestuario(Menu):
         self.nave_seleccionada = 1
         self.bala_seleccionada = 1
         self.opcion_seleccionada = 0
+        self.fondo = p.image.load(FONDO_NIVELES)
+        self.fondo = p.transform.scale(self.fondo, (ANCHO, ALTO))
     
     def manejar_eventos(self):
         """Maneja eventos del menú vestuario"""
@@ -219,7 +228,7 @@ class MenuVestuario(Menu):
     
     def dibujar(self):
         """Dibuja el menú de vestuario"""
-        self.ventana.fill(FONDO_OSCURO)
+        self.ventana.blit(self.fondo, (0, 0))
         self.dibujar_cuadricula_fondo()
         
         y_inicio = 220

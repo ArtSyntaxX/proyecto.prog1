@@ -133,3 +133,13 @@ ENEMIGOS = {
     "boss": "recursos/enemigos/boss1.png",
     "normal": "recursos/enemigos/boss1.png"  # Usando la misma por ahora
 }
+
+FONDO_START = "recursos/fondos/fondostart.png"
+FONDO_NIVELES = "recursos/fondos/fondoniveles.png"
+FONDOS_NIVELES = {
+    1: "recursos/fondos/fondo1.png",
+    2: "recursos/fondos/fondo2.png",
+    3: "recursos/fondos/fondo3.png",
+    4: "recursos/fondos/fondo4.png",
+    5: "recursos/fondos/fondo5.png"
+}
