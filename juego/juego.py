@@ -67,11 +67,11 @@ class Juego:
         self.bala_img = p.transform.scale(self.bala_img, bala_size)
         
         # Enemigo
-        self.enemigo_img = p.image.load(ENEMIGOS["normal"]).convert_alpha()
+        self.enemigo_img = p.image.load(ENEMIGOS[self.nivel]).convert_alpha()
         self.enemigo_img = p.transform.scale(self.enemigo_img, (50, 50))
         
         # Bala enemiga
-        self.bala_enemiga_img = p.image.load(ENEMIGOS["boss"]).convert_alpha()
+        self.bala_enemiga_img = p.image.load(BALA_ENEMIGO).convert_alpha()
         self.bala_enemiga_img = p.transform.scale(self.bala_enemiga_img, (10, 15))
         
         # Explosiones
@@ -86,6 +86,8 @@ class Juego:
         self.enemigos = []
         num_enemigos = self.config_nivel["enemigos"]
         vida_enemigo = self.config_nivel["vida_enemigo"]
+        enemigo_img = p.image.load(ENEMIGOS[self.nivel]).convert_alpha()
+        enemigo_img = p.transform.scale(enemigo_img, (50, 50))
         
         # Distribuir enemigos en la pantalla
         for i in range(num_enemigos):
