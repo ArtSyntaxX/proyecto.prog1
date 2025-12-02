@@ -2,49 +2,32 @@
 # -*- coding: utf-8 -*-
 """Script para actualizar la función ejecutar() en juego.py"""
 
+# Leer el archivo actual
 with open('juego/juego.py', 'r', encoding='utf-8') as f:
-    content = f.read()
+    lineas = f.readlines()
 
-# Encontrar y reemplazar la función ejecutar
-old_func = '''    def ejecutar(self):
-        """Bucle principal del juego"""
-        reloj = p.time.Clock()
+# Buscar donde está la función ejecutar
+inicio = None
+for i, linea in enumerate(lineas):
+    if 'def ejecutar(self):' in linea:
+        inicio = i
+        break
 
-        while self.ejecutandose:
-            # Manejo de eventos
-            resultado = self.manejar_eventos()
-            if resultado:
-                return resultado
+if inicio is None:
+    print("No se encontró la función ejecutar")
+    exit(1)
 
-            # Lógica del juego
-            if self.vida_nave > 0 and not self.victoria: 
-                self.mover_nave()
-                self.mover_balas()
-                self.mover_enemigos()
-                self.actualizar_explosiones()
-                self.detectar_colisiones()
-                self.verificar_victoria()
+# Encontrar dónde termina (siguiente def o EOF)
+fin = len(lineas)
+for i in range(inicio + 1, len(lineas)):
+    if lineas[i].strip().startswith('def ') and not lineas[i].strip().startswith('"""'):
+        fin = i
+        break
 
-            # Pantallas finales
-            if self.victoria or self.vida_nave <= 0:     
-                for event in p.event.get():
-                    if event.type == p.QUIT:
-                        return "quit"
-                    if event.type == p.KEYDOWN:
-                        if event.key == p.K_RETURN:      
-                            return "niveles"
-                        elif event.key == p.K_ESCAPE:    
-                            return "menu_inicio"
+print(f"Función ejecutar: líneas {inicio+1} a {fin}")
 
-            # Dibujo
-            self.dibujar()
-
-            # FPS
-            reloj.tick(100)
-
-        return "menu_inicio"'''
-
-new_func = '''    def ejecutar(self):
+# Nueva función
+nueva_func = '''    def ejecutar(self):
         """Bucle principal del juego"""
         reloj = p.time.Clock()
 
@@ -90,19 +73,15 @@ new_func = '''    def ejecutar(self):
             # FPS
             reloj.tick(100)
 
-        return "menu_inicio"'''
+        return "menu_inicio"
 
-new_content = content.replace(old_func, new_func)
+'''
 
-if new_content == content:
-    print("ERROR: Reemplazo no funcionó")
-    print("Buscando 'def ejecutar'...")
-    if 'def ejecutar' in content:
-        idx = content.find('def ejecutar')
-        print(f"Encontrado en posición {idx}")
-        print("Primeras 300 caracteres después:")
-        print(repr(content[idx:idx+300]))
-else:
-    with open('juego/juego.py', 'w', encoding='utf-8') as f:
-        f.write(new_content)
-    print("OK: Archivo actualizado exitosamente")
+# Reemplazar
+nuevo_contenido = ''.join(lineas[:inicio]) + nueva_func + ''.join(lineas[fin:])
+
+# Escribir
+with open('juego/juego.py', 'w', encoding='utf-8') as f:
+    f.write(nuevo_contenido)
+
+print("Archivo actualizado correctamente")

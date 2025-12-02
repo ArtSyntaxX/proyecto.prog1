@@ -86,18 +86,18 @@ Presiona CUALQUIER TECLA (no solo ENTER) para volver
 
 ```
 proyecto.prog1/
-├── run.py                 # Punto de entrada principal
-├── juego/
-│   ├── __init__.py
-│   ├── main.py           # Logica principal del juego
-│   ├── config.py         # Configuracion y constantes
-│   ├── menu.py           # Clases de menus
-│   ├── juego.py          # Clase principal del juego
-│   └── juegazo           # Alias del juego (compatible)
-├── recursos/             # Imagenes y assets
-│   ├── enemigos/
-│   ├── explosion/
-│   ├── fondos/
+|- run.py                 # Punto de entrada principal
+|- juego/
+|  - __init__.py
+|  - main.py              # Logica principal del juego
+|  - config.py            # Configuracion y constantes
+|  - menu.py              # Clases de menus
+|  - juego.py             # Clase principal del juego
+|  - juegazo              # Alias del juego (compatible)
+|- recursos/              # Imagenes y assets
+|  - enemigos/
+|  - explosion/
+|  - fondos/
 │   └── ...
 └── README.md            # Este archivo
 ```

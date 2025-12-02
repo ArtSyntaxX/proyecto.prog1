@@ -1,4 +1,4 @@
-💻 Cada vez que empieces a trabajar
+[INFO] Cada vez que empieces a trabajar
 
 Abre la terminal en VS Code (Ctrl + ñ).
 
@@ -9,7 +9,7 @@ git pull
 
 Trae los últimos cambios del repositorio remoto (GitHub).
 
-✍️ Cuando termines de programar algo
+[NOTE] Cuando termines de programar algo
 
 Guarda tus archivos y ejecuta:
 
@@ -17,29 +17,29 @@ git add .
 git commit -m "Descripción breve del cambio"
 git push
 
-✅ 3. Mañana: qué NECESITAN tus compañeros
+[OK] 3. Mañana: qué NECESITAN tus compañeros
 
 Cada compañero necesita instalar:
 
-✔ 1. VS Code
-✔ 2. Git
+[x] 1. VS Code
+[x] 2. Git
 https://git-scm.com/downloads
 Comprobar que funciona:
 git --version
 
-✔ 3. Python instalado
+[x] 3. Python instalado
 Y en VS Code, la extensión “Python”.
 
-✔ 4. (Opcional pero recomendable) Pygame
+[x] 4. (Opcional pero recomendable) Pygame
 Cuando ya descarguen tu proyecto:
 pip install pygame
 
 Con eso ya podrán ejecutar tu juego.
 
-✅ 4. Mañana: qué tendrán que hacer EXACTAMENTE tus compañeros
+[OK] 4. Mañana: qué tendrán que hacer EXACTAMENTE tus compañeros
 
 
-🟦 Paso 1 — Clonar el repositorio
+Paso 1 - Clonar el repositorio
 
 Todos escriben en terminal:
 
@@ -80,7 +80,7 @@ python nombre_del_archivo.py
 
 Con esto tenéis para trabajar sin que nada explote.
 
-⭐ 6. Qué tienes que hacer TÚ mañana
+* 6. Qué tienes que hacer TÚ mañana
 
 
 ✔ Comprobar que todos tienen Git y VS Code funcionando

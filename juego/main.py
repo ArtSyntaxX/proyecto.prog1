@@ -11,13 +11,13 @@ def main():
     Función principal que controla el flujo de la aplicación.
     
     Flujo de menús:
-    - MenuInicio (MENÚ PRINCIPAL)
-      ├─ START → MenuNiveles (5 niveles disponibles)
-      │          └─ Selecciona nivel → Juego
-      │                                 └─ Vuelve a MenuInicio
-      │
-      └─ VESTUARIO → MenuVestuario (Elegir Nave → Elegir Balas)
-                     └─ Vuelve a MenuInicio
+    - MenuInicio (MENU PRINCIPAL)
+      - START -> MenuNiveles (5 niveles disponibles)
+      - Selecciona nivel -> Juego
+      - Vuelve a MenuInicio
+      
+      - VESTUARIO -> MenuVestuario (Elegir Nave - Elegir Balas)
+      - Vuelve a MenuInicio
     """
     p.init()
     ventana = p.display.set_mode((ANCHO, ALTO))
