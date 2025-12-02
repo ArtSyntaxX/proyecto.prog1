@@ -1,14 +1,17 @@
 import pygame as p
+# Archivo: config.py
+# Propósito: definir constantes y configuraciones compartidas por todo el juego.
+# Este módulo NO tiene clases; solo valores que otros módulos importan.
 
 
 
 # todas las variables globales 
 
-# Dimensiones de ventana
+# Dimensiones de ventana (ancho y alto en píxeles)
 ANCHO = 600
 ALTO = 800
 
-# Colores
+# Colores en formato RGB (R, G, B)
 BLANCO = (255, 255, 255)
 NEGRO = (0, 0, 0)
 ROJO = (255, 0, 0)
@@ -22,7 +25,7 @@ GRIS_OSCURO = (30, 30, 30)
 GRIS_CLARO = (100, 100, 100)
 FONDO_OSCURO = (15, 15, 35)
 
-# Fuentes
+# Fuentes (tipografías) básicas para textos
 p.font.init()
 FUENTE_TITULO = p.font.Font(None, 72)
 FUENTE_MENU = p.font.Font(None, 48)
@@ -30,7 +33,8 @@ FUENTE_TEXTO = p.font.Font(None, 36)
 FUENTE_PEQUENA = p.font.Font(None, 24)
 FUENTE_HUD = p.font.Font(None, 28)
 
-# Configuración de naves (3 naves diferentes)
+# Configuración de naves (diccionario de 3 naves)
+# Cada entrada define sprite, nombre visible, velocidad y color.
 NAVES = {
     1: {
         "sprite": "recursos/ship5.png",
@@ -55,7 +59,8 @@ NAVES = {
     }
 }
 
-# Configuración de balas (3 tipos diferentes)
+# Configuración de balas (3 tipos)
+# Cada bala tiene sprite, nombre visible, daño, velocidad y tamaño.
 BALAS = {
     1: {
         "sprite": "recursos/bala.png",
@@ -84,6 +89,7 @@ BALAS = {
 }
 
 # Niveles (5 niveles con objetivos claros)
+# Cada nivel define cantidad/vida de enemigos, objetivo de puntos y comportamiento.
 NIVELES = {
     1: {
         "nombre": "Muy Facil",
@@ -133,6 +139,7 @@ NIVELES = {
 }
 
 # Configuración de enemigos (5 tipos disponibles en recursos/enemigos)
+# Se usan rutas relativas a la carpeta 'recursos/enemigos/'.
 ENEMIGOS = {
     1: "recursos/enemigos/enemigo1.png",
     2: "recursos/enemigos/enemigo2.png",
@@ -142,6 +149,7 @@ ENEMIGOS = {
 }
 
 # Fondos por pantalla (en recursos/fondos)
+# Claves especiales: "inicio" y "niveles"; claves numéricas para cada nivel.
 FONDOS = {
     "inicio": "recursos/fondos/fondostart.png",
     "niveles": "recursos/fondos/fondoniveles.png",

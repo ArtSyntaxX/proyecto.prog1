@@ -1,5 +1,9 @@
 import pygame as p
 from .config import *
+# Archivo: main.py
+# Propósito: orquestar el flujo de pantallas (menús y juego).
+# Este módulo crea la ventana, decide el estado actual y llama
+# a métodos de las clases de menú y del juego según la interacción.
 from .menu import MenuInicio, MenuNiveles, MenuVestuario
 from .juego import Juego
 import warnings
@@ -7,18 +11,15 @@ warnings.filterwarnings("ignore", category=UserWarning)
 
 
 def main():
-    """
-    Función principal que controla el flujo de la aplicación.
+        """
+        Función principal (entrypoint) que controla el flujo de la aplicación.
+        Viene del módulo 'main.py' dentro del paquete 'juego'.
     
-    Flujo de menús:
-    - MenuInicio (MENU PRINCIPAL)
-      - START -> MenuNiveles (5 niveles disponibles)
-      - Selecciona nivel -> Juego
-      - Vuelve a MenuInicio
-      
-      - VESTUARIO -> MenuVestuario (Elegir Nave - Elegir Balas)
-      - Vuelve a MenuInicio
-    """
+        Flujo:
+            - MenuInicio: START/NIVELES, VESTUARIO, QUIT
+            - MenuNiveles: al elegir nivel se crea y ejecuta Juego
+            - MenuVestuario: elegir Nave/Balas y volver a inicio
+        """
     p.init()
     ventana = p.display.set_mode((ANCHO, ALTO))
     p.display.set_caption("Space Shooter - Selecciona tu aventura")
@@ -37,7 +38,7 @@ def main():
     print(f"Niveles disponibles: {len(NIVELES)}")
     print("=" * 50)
     
-    # Bucle principal
+    # Bucle principal (decide qué pantalla mostrar según 'estado')
     while True:
         # ========== MENÚ INICIO ==========
         if estado == "menu_inicio":
