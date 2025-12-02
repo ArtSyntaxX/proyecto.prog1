@@ -55,6 +55,7 @@ class Juego:
         self.victoria = False
         self.contador_victoria = 0
         self.contador_disparo_enemigo = 0
+        self.final_mostrado_ms = None  # marca de tiempo al entrar en pantalla final
         # Rect del botón final (se asigna en el dibujo de pantalla final)
         self.final_button_rect = None
     
@@ -305,6 +306,7 @@ class Juego:
         """Verifica si se alcanzo el objetivo"""
         if self.score >= self.objetivo_puntos and len(self.enemigos) == 0:
             self.victoria = True
+            self.final_mostrado_ms = p.time.get_ticks()
             return True
         return False
     
@@ -341,6 +343,8 @@ class Juego:
             self.dibujar_victoria()
         
         if self.vida_nave <= 0:
+            if self.final_mostrado_ms is None:
+                self.final_mostrado_ms = p.time.get_ticks()
             self.dibujar_derrota()
         
         p.display.flip()
@@ -473,7 +477,12 @@ class Juego:
                     evt = p.event.wait()
                     if evt.type == p.QUIT:
                         return "quit"
-                    if evt.type == p.KEYDOWN or evt.type == p.MOUSEBUTTONDOWN:
+                    # Requerir un tiempo mínimo de visualización (1.5s)
+                    if self.final_mostrado_ms is None:
+                        self.final_mostrado_ms = p.time.get_ticks()
+                    tiempo_minimo = 1500
+                    elapsed = p.time.get_ticks() - self.final_mostrado_ms
+                    if (evt.type == p.KEYDOWN or evt.type == p.MOUSEBUTTONDOWN) and elapsed >= tiempo_minimo:
                         return "niveles"
             
             # Gameplay normal

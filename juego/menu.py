@@ -28,14 +28,16 @@ class Menu:
     def dibujar_opcion(self, texto, y, seleccionada):
         """Dibuja una opción del menú con indicador"""
         color = AMARILLO if seleccionada else BLANCO
-        # Indicador cuadrado discreto a la izquierda de la opción
+        superficie = FUENTE_MENU.render(texto, True, color)
+        rect = superficie.get_rect(center=(ANCHO // 2, y))
+        # Indicador cuadrado discretamente centrado respecto al texto
         if seleccionada:
             indicador_w = 12
             indicador_h = 12
-            indicador_x = ANCHO // 2 - 240
-            indicador_y = y - 12
+            indicador_x = rect.left - 24
+            indicador_y = rect.centery - indicador_h // 2
             p.draw.rect(self.ventana, CIAN, (indicador_x, indicador_y, indicador_w, indicador_h))
-        self.dibujar_texto_centrado(texto, FUENTE_MENU, color, y)
+        self.ventana.blit(superficie, rect)
     
     def dibujar_cuadricula_fondo(self):
         """Dibuja una cuadrícula de fondo"""
