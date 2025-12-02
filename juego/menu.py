@@ -226,10 +226,10 @@ class MenuVestuario(Menu):  # Dos fases: elegir nave y luego balas
             for i in range(1, 4):
                 img = p.image.load(NAVES[i]["sprite"]).convert_alpha()
                 self.preview_naves[i] = p.transform.smoothscale(img, (70, 100))
-            # Previews de balas: preservar aspecto dentro de caja max 30x60
+            # Previews de balas: preservar aspecto dentro de caja max 60x120 (mas grandes)
             for i in range(1, 4):
                 img = p.image.load(BALAS[i]["sprite"]).convert_alpha()
-                max_w, max_h = 30, 60
+                max_w, max_h = 60, 120
                 ow, oh = img.get_size()
                 escala = min(max_w / ow, max_h / oh)
                 nw = max(8, int(ow * escala))
@@ -347,13 +347,13 @@ class MenuVestuario(Menu):  # Dos fases: elegir nave y luego balas
             self.dibujar_texto_centrado("SPACE SHOOTER", FUENTE_TITULO, AZUL, 40)
             self.dibujar_texto_centrado("ELIGE TUS BALAS", FUENTE_MENU, ROJO, 140)
             
-            # Info nave seleccionada
+            # Info nave seleccionada (subimos para no tapar la segunda bala)
             nave_info = f"Nave: {NAVES[self.nave_seleccionada]['nombre']}"
-            self.dibujar_texto_centrado(nave_info, FUENTE_PEQUENA, VERDE, 210)
+            self.dibujar_texto_centrado(nave_info, FUENTE_PEQUENA, VERDE, 170)
             
             # Previsualización fila superior de balas
             try:
-                base_y = 200
+                base_y = 240
                 pos_x = [ANCHO//2 - 220, ANCHO//2, ANCHO//2 + 220]
                 for i in range(1, 4):
                     surf = self.preview_balas.get(i)
@@ -362,7 +362,7 @@ class MenuVestuario(Menu):  # Dos fases: elegir nave y luego balas
                         self.ventana.blit(surf, rect)
                         nombre = BALAS[i]['nombre']
                         etiqueta = FUENTE_PEQUENA.render(nombre, True, BLANCO)
-                        etiqueta_rect = etiqueta.get_rect(center=(pos_x[i-1], base_y + 70))
+                        etiqueta_rect = etiqueta.get_rect(center=(pos_x[i-1], base_y + 85))
                         self.ventana.blit(etiqueta, etiqueta_rect)
             except Exception:
                 pass
@@ -374,7 +374,7 @@ class MenuVestuario(Menu):  # Dos fases: elegir nave y luego balas
                 "<- Volver a Elegir Nave"
             ]
             
-            y_inicio = 320
+            y_inicio = 360
             for i, opcion in enumerate(opciones):
                 y_opcion = y_inicio + i * espaciado
                 
