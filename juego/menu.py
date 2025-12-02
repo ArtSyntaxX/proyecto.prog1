@@ -10,22 +10,26 @@ from .config import *
 #=================================
 
 class Menu:
-    #Clase base para todos los menús funncion de funciones de funciones que es usada por las otras clases 
-    # líneas definen la clase base Menu 
-    # y sus métodos de dibujo básicos. Es la "caja de herramientas" visual que usan los demás menús
+    # Clase base de utilidades de dibujo y selección para menús
     
-    def __init__(self, ventana): # ventana q la saca del main
+    # Parametros: ventana (pygame.Surface)
+    # Retorno: None
+    def __init__(self, ventana):  # Guarda ventana y estado de selección
         self.ventana = ventana
         self.opcion_seleccionada = 0
         
-    def dibujar_texto_centrado(self, texto, fuente, color, y):
+    # Parametros: texto (str), fuente (pygame.font.Font), color (tuple RGB), y (int)
+    # Retorno: pygame.Rect del texto dibujado
+    def dibujar_texto_centrado(self, texto, fuente, color, y):  # Centra texto en X
         """Dibuja texto centrado horizontalmente"""
         superficie = fuente.render(texto, True, color)
         rect = superficie.get_rect(center=(ANCHO // 2, y))
         self.ventana.blit(superficie, rect)
         return rect
     
-    def dibujar_opcion(self, texto, y, seleccionada):
+    # Parametros: texto (str), y (int), seleccionada (bool)
+    # Retorno: None
+    def dibujar_opcion(self, texto, y, seleccionada):  # Pinta opción y cuadrado activo
         """Dibuja una opción del menú con indicador"""
         color = AMARILLO if seleccionada else BLANCO
         superficie = FUENTE_MENU.render(texto, True, color)
@@ -39,7 +43,9 @@ class Menu:
             p.draw.rect(self.ventana, CIAN, (indicador_x, indicador_y, indicador_w, indicador_h))
         self.ventana.blit(superficie, rect)
     
-    def dibujar_cuadricula_fondo(self):
+    # Parametros: ninguno
+    # Retorno: None
+    def dibujar_cuadricula_fondo(self):  # Fondo rejilla decorativa
         """Dibuja una cuadrícula de fondo"""
         tamaño_grid = 50
         
@@ -49,19 +55,25 @@ class Menu:
         for y in range(0, ALTO, tamaño_grid):
             p.draw.line(self.ventana, GRIS_OSCURO, (0, y), (ANCHO, y), 1)
     
-    def dibujar_borde_decorativo(self, x, y, ancho, alto):
+    # Parametros: x,y (int), ancho,alto (int)
+    # Retorno: None
+    def dibujar_borde_decorativo(self, x, y, ancho, alto):  # Marco simple con color CIAN
         """Dibuja un borde decorativo"""
         p.draw.rect(self.ventana, CIAN, (x, y, ancho, alto), 2)
 
 
-class MenuInicio(Menu):
+class MenuInicio(Menu):  # Menú principal: START, VESTUARIO, QUIT
     """Menú principal con opciones START, VESTUARIO y QUIT"""
-    def __init__(self, ventana):
+    # Parametros: ventana (pygame.Surface)
+    # Retorno: None
+    def __init__(self, ventana):  # Define lista de opciones y selección
         super().__init__(ventana) # usa el init de la calse menu q es la padre
         self.opciones = ["START", "VESTUARIO", "QUIT"]
         self.opcion_seleccionada = 0
     
-    def manejar_eventos(self):
+    # Parametros: ninguno (usa p.event.get())
+    # Retorno: 'quit'|'niveles'|'vestuario'|None
+    def manejar_eventos(self):  # Navega con TAB/UP/DOWN y selecciona con ENTER
         """Maneja eventos del menú inicio"""
         for event in p.event.get():
             if event.type == p.QUIT:# la x de la ventana 
@@ -84,7 +96,9 @@ class MenuInicio(Menu):
         
         return None
     
-    def dibujar(self):
+    # Parametros: ninguno
+    # Retorno: None
+    def dibujar(self):  # Fondo, títulos, opciones y ayudas
         """Dibuja el menú de inicio"""
         # Fondo de pantalla de inicio
         try:
@@ -119,16 +133,20 @@ class MenuInicio(Menu):
         
         p.display.flip()
 
-class MenuNiveles(Menu):
+class MenuNiveles(Menu):  # Selector de nivel (1..5) o volver
     """Menú para seleccionar uno de los 5 niveles disponibles"""
-    def __init__(self, ventana):
+    # Parametros: ventana (pygame.Surface)
+    # Retorno: None
+    def __init__(self, ventana):  # Crea opciones desde config.NIVELES
         super().__init__(ventana)
         # Crear opciones dinámicamente desde config
         self.opciones = [f"Nivel {i} - {NIVELES[i]['nombre']}" for i in range(1, 6)]
         self.opciones.append("<- Volver al Menú Principal")
         self.opcion_seleccionada = 0
     
-    def manejar_eventos(self):
+    # Parametros: ninguno
+    # Retorno: 'quit'|'menu_inicio'|('juego',nivel)|None
+    def manejar_eventos(self):  # Devuelve ("juego", nivel) o back/quit
         """Maneja eventos del menú de niveles"""
         for event in p.event.get():
             if event.type == p.QUIT:
@@ -153,7 +171,9 @@ class MenuNiveles(Menu):
         
         return None
     
-    def dibujar(self):
+    # Parametros: ninguno
+    # Retorno: None
+    def dibujar(self):  # Fondo niveles, títulos y lista con selección
         # Fondo del selector de niveles
         try:
             fondo = p.image.load(FONDOS["niveles"]).convert()
@@ -188,9 +208,11 @@ class MenuNiveles(Menu):
         p.display.flip()
 
 
-class MenuVestuario(Menu):
+class MenuVestuario(Menu):  # Dos fases: elegir nave y luego balas
     """Menú para seleccionar nave y tipo de bala en dos fases"""
-    def __init__(self, ventana):
+    # Parametros: ventana (pygame.Surface)
+    # Retorno: None
+    def __init__(self, ventana):  # Carga previews y estado fase/selección
         super().__init__(ventana)
         self.fase = "nave"  # "nave" o "bala"
         self.nave_seleccionada = 1
@@ -211,7 +233,9 @@ class MenuVestuario(Menu):
         except Exception:
             pass
     
-    def manejar_eventos(self):
+    # Parametros: ninguno
+    # Retorno: 'quit'|'menu_inicio'|('vestuario_completo',nave,bala)|None
+    def manejar_eventos(self):  # Control de TAB/UP/DOWN/ENTER/ESC entre fases
         """Maneja eventos del menú vestuario"""
         for event in p.event.get():
             if event.type == p.QUIT:
@@ -257,7 +281,9 @@ class MenuVestuario(Menu):
         
         return None
     
-    def dibujar(self):
+    # Parametros: ninguno
+    # Retorno: None
+    def dibujar(self):  # Pinta fondo, títulos, previews y opciones
         """Dibuja el menú de vestuario"""
         # Fondo del vestuario: reutiliza fondo de inicio
         try:

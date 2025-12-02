@@ -1,77 +1,81 @@
-import pygame as p
-from .config import *
-import random
-import math
+import pygame as p     # Motor gráfico y entrada de usuario
+from .config import *  # Constantes y recursos compartidos
+import random          # Aleatoriedad para patrones y valores
+import math            # Cálculos de dirección/velocidad
 # test para comprobar git
 
-class Juego:
+class Juego:    # Clase principal: gestiona un nivel y su jugabilidad
     """Clase principal del juego con enemigos avanzados"""
     
-    def __init__(self, ventana, nivel, nave_tipo, bala_tipo):
+    # Parametros: ventana (pygame.Surface), nivel (int 1..5),
+    #             nave_tipo (int 1..3), bala_tipo (int 1..3)
+    # Retorno: None
+    def __init__(self, ventana, nivel, nave_tipo, bala_tipo):     # Constructor: recibe ventana y elecciones
         self.ventana = ventana
         self.nivel = nivel
         self.nave_tipo = nave_tipo
         self.bala_tipo = bala_tipo
         
         # Configuracion del nivel
-        self.config_nivel = NIVELES[nivel]
+        self.config_nivel = NIVELES[nivel]     # Parámetros del nivel activo
         
         # Posicion nave jugador
-        self.nave_x = ANCHO // 2 - 25
-        self.nave_y = ALTO - 100
+        self.nave_x = ANCHO // 2 - 25     # X inicial centrada
+        self.nave_y = ALTO - 100          # Y inicial en zona inferior
         
         # Velocidad nave
-        self.velocidad_nave = NAVES[nave_tipo]["velocidad"]
-        self.velocidad_bala = BALAS[bala_tipo]["velocidadB"]
+        self.velocidad_nave = NAVES[nave_tipo]["velocidad"]     # Velocidad de la nave elegida
+        self.velocidad_bala = BALAS[bala_tipo]["velocidadB"]     # Velocidad de las balas elegidas
         
         # Vida
-        self.vida_nave = 5
-        self.vida_maxima = 5
+        self.vida_nave = 5               # Vida actual del jugador
+        self.vida_maxima = 5             # Vida máxima del jugador
         
         # Puntuacion
-        self.score = 0
-        self.objetivo_puntos = self.config_nivel["objetivo_puntos"]
-        self.enemigos_derrotados = 0
+        self.score = 0                                   # Contador de puntos
+        self.objetivo_puntos = self.config_nivel["objetivo_puntos"]  # Meta de puntos
+        self.enemigos_derrotados = 0                     # Contador de enemigos abatidos
         
         # Recursos
-        self.cargar_recursos()
+        self.cargar_recursos()        # Carga sprites/fondos/explosiones
         
         # Balas
-        self.balas_jugador = []
-        self.balas_enemigo = []
+        self.balas_jugador = []       # Balas disparadas por el jugador
+        self.balas_enemigo = []       # Balas disparadas por los enemigos
         # Control de disparo (cooldown)
-        self.ultimo_disparo_ms = 0
-        self.disparo_cooldown_ms = 180  # dispara rapido pero no metralleta infinita
+        self.ultimo_disparo_ms = 0     # Marca temporal para limitar cadencia
+        self.disparo_cooldown_ms = 180  # Cadencia moderada (ms)
         
         # Enemigos
-        self.enemigos = []
-        self.crear_oleada_enemigos()
+        self.enemigos = []            # Lista de enemigos activos
+        self.crear_oleada_enemigos()  # Genera oleada inicial
         
         # Explosiones
-        self.explosiones = []
+        self.explosiones = []         # Animaciones en curso
         
         # Control
-        self.ejecutandose = True
-        self.victoria = False
-        self.contador_victoria = 0
-        self.contador_disparo_enemigo = 0
-        self.final_mostrado_ms = None  # marca de tiempo al entrar en pantalla final
-        # Rect del botón final (se asigna en el dibujo de pantalla final)
-        self.final_button_rect = None
+        self.ejecutandose = True      # Bucle principal activo
+        self.victoria = False         # Bandera de victoria
+        self.contador_victoria = 0    # Placeholder
+        self.contador_disparo_enemigo = 0  # Ritmo global enemigo
+        self.final_mostrado_ms = None  # Marca al entrar en pantalla final
+        self.final_button_rect = None  # Rect del botón VOLVER
     
-    def cargar_recursos(self):
+    # Parametros: ninguno
+    # Retorno: None
+    def cargar_recursos(self):     # Carga sprites y fondo
         """Carga todas las imagenes necesarias"""
         # Nave del jugador
-        self.nave_img = p.image.load(NAVES[self.nave_tipo]["sprite"]).convert_alpha()
+        self.nave_img = p.image.load(NAVES[self.nave_tipo]["sprite"]).convert_alpha()  # Sprite nave
         self.nave_img = p.transform.scale(self.nave_img, (50, 80))
         
         # Bala del jugador
-        bala_size = BALAS[self.bala_tipo]["tamaño"]
+        bala_size = BALAS[self.bala_tipo]["tamaño"]  # Tamaño visual de bala
         self.bala_img = p.image.load(BALAS[self.bala_tipo]["sprite"]).convert_alpha()
         self.bala_img = p.transform.scale(self.bala_img, bala_size)
         
         # Enemigo (elige uno según nivel: 1..5)
-        enemigo_tipo = max(1, min(5, self.nivel))
+        enemigo_tipo = max(1, min(5, self.nivel))  # Selección de sprite enemigo
         self.enemigo_img = p.image.load(ENEMIGOS[enemigo_tipo]).convert_alpha()
         self.enemigo_img = p.transform.scale(self.enemigo_img, (50, 50))
         
@@ -81,7 +85,7 @@ class Juego:
 
         # Fondo del nivel
         try:
-            self.fondo_img = p.image.load(FONDOS.get(self.nivel, FONDO_OSCURO)).convert()
+            self.fondo_img = p.image.load(FONDOS.get(self.nivel, FONDO_OSCURO)).convert()  # Fondo nivel
         except Exception:
             self.fondo_img = None
         
@@ -92,15 +96,17 @@ class Juego:
             img = p.transform.scale(img, (70, 70))
             self.explosion_imgs.append(img)
     
-    def crear_oleada_enemigos(self):
+    # Parametros: ninguno
+    # Retorno: None
+    def crear_oleada_enemigos(self):     # Inicializa la lista de enemigos
         """Crea una oleada de enemigos"""
         self.enemigos = []
         num_enemigos = self.config_nivel["enemigos"]
         vida_enemigo = self.config_nivel["vida_enemigo"]
         
         for i in range(num_enemigos):
-            x = (ANCHO // (num_enemigos + 1)) * (i + 1)
-            y = 50 + (i % 3) * 80
+            x = (ANCHO // (num_enemigos + 1)) * (i + 1)   # Distribuye en X
+            y = 50 + (i % 3) * 80                         # Filas en Y
             
             enemigo = {
                 "x": x,
@@ -119,15 +125,17 @@ class Juego:
             }
             self.enemigos.append(enemigo)
     
-    def manejar_eventos(self):
+    # Parametros: ninguno (lee p.event.get())
+    # Retorno: 'quit'|'niveles'|'menu_inicio'|None
+    def manejar_eventos(self):     # Teclado/ratón durante juego activo o final
         """Maneja eventos del jugador"""
         for event in p.event.get():
-            if event.type == p.QUIT:
+            if event.type == p.QUIT:     # Cerrar ventana
                 return "quit"
 
             # Si estamos en estado final (victoria/derrota) cualquier tecla
             # o clic debe devolver al menú de niveles.
-            if self.victoria or self.vida_nave <= 0:
+            if self.victoria or self.vida_nave <= 0:     # En pantalla final
                 # Registro para depuración: entrada a handler final
                 msg = f"[DEBUG] manejar_eventos: estado final detectado, evento: {event.type}\n"
                 print(msg, end="")
@@ -147,7 +155,7 @@ class Juego:
                     return "niveles"
 
             # En juego activo, procesar controles normales
-            if event.type == p.KEYDOWN:
+            if event.type == p.KEYDOWN:  # Controles principales
                 if event.key == p.K_SPACE:
                     self.disparar_jugador()
                 elif event.key == p.K_ESCAPE:
@@ -155,9 +163,11 @@ class Juego:
 
         return None
     
-    def disparar_jugador(self):
+    # Parametros: ninguno
+    # Retorno: None (agrega bala a self.balas_jugador si cooldown permite)
+    def disparar_jugador(self):     # Disparo del jugador con cooldown
         """Crea una bala del jugador"""
-        ahora = p.time.get_ticks()
+        ahora = p.time.get_ticks()   # Tiempo actual en milisegundos
         if ahora - self.ultimo_disparo_ms < self.disparo_cooldown_ms:
             return
         self.ultimo_disparo_ms = ahora
@@ -170,13 +180,15 @@ class Juego:
         }
         self.balas_jugador.append(bala)
     
-    def disparar_enemigo(self, enemigo):
+    # Parametros: enemigo (dict con 'x','y','apunta_jugador', etc.)
+    # Retorno: None (agrega bala a self.balas_enemigo)
+    def disparar_enemigo(self, enemigo):     # Genera bala enemiga
         """Crea una bala de enemigo"""
         if not self.config_nivel["pueden_disparar"]:
             return
         
         # Algunos enemigos apuntan al jugador; otros disparan recto o con ligera desviación
-        if enemigo.get("apunta_jugador", False):
+        if enemigo.get("apunta_jugador", False):   # Sólo algunos apuntan
             dx = self.nave_x - enemigo["x"]
             dy = self.nave_y - enemigo["y"]
             distancia = math.sqrt(dx**2 + dy**2)
@@ -199,7 +211,9 @@ class Juego:
         }
         self.balas_enemigo.append(bala)
     
-    def mover_nave(self):
+    # Parametros: ninguno
+    # Retorno: None
+    def mover_nave(self):     # Movimiento con límites
         """Mueve la nave del jugador"""
         teclas = p.key.get_pressed()
         # Limite de movimiento: tercio inferior de la pantalla
@@ -213,7 +227,9 @@ class Juego:
         if teclas[p.K_DOWN] and self.nave_y < ALTO - 85:
             self.nave_y += self.velocidad_nave
     
-    def mover_balas(self):
+    # Parametros: ninguno
+    # Retorno: None
+    def mover_balas(self):     # Avanza balas y limpia fuera de pantalla
         """Mueve todas las balas"""
         for bala in self.balas_jugador[:]:
             bala["y"] += bala["vy"]
@@ -226,7 +242,9 @@ class Juego:
             if bala["y"] < 0 or bala["y"] > ALTO or bala["x"] < 0 or bala["x"] > ANCHO:
                 self.balas_enemigo.remove(bala)
     
-    def mover_enemigos(self):
+    # Parametros: ninguno
+    # Retorno: None
+    def mover_enemigos(self):  # Desplazamiento enemigos + ritmo disparo
         """Mueve los enemigos"""
         velocidad_movimiento = self.config_nivel["velocidad_enemigo"]
         
@@ -244,7 +262,9 @@ class Juego:
                     # Patrón de ritmo: Pum...Pum (cooldown aleatorio por enemigo)
                     enemigo["contador_disparo"] = random.randint(enemigo.get("cooldown_min", 60), enemigo.get("cooldown_max", 140))
     
-    def actualizar_explosiones(self):
+    # Parametros: ninguno
+    # Retorno: None
+    def actualizar_explosiones(self):   # Avanza frames y elimina al terminar
         """Actualiza las animaciones de explosiones"""
         for explosion in self.explosiones[:]:
             explosion["contador_frames"] += 1
@@ -256,7 +276,9 @@ class Juego:
             if explosion["frame_actual"] >= len(self.explosion_imgs):
                 self.explosiones.remove(explosion)
     
-    def detectar_colisiones(self):
+    # Parametros: ninguno
+    # Retorno: None
+    def detectar_colisiones(self):   # Colisiones jugador/enemigos/balas
         """Detecta todas las colisiones"""
         daño_bala = BALAS[self.bala_tipo]["daño"]
         
@@ -302,7 +324,9 @@ class Juego:
                 self.explosiones.append(explosion)
                 break
     
-    def verificar_victoria(self):
+    # Parametros: ninguno
+    # Retorno: bool (True si objetivo cumplido y sin enemigos)
+    def verificar_victoria(self):   # ¿Se cumplió objetivo y no quedan enemigos?
         """Verifica si se alcanzo el objetivo"""
         if self.score >= self.objetivo_puntos and len(self.enemigos) == 0:
             self.victoria = True
@@ -310,7 +334,9 @@ class Juego:
             return True
         return False
     
-    def dibujar(self):
+    # Parametros: ninguno
+    # Retorno: None
+    def dibujar(self):   # Pinta fondo, sprites, HUD, overlays finales
         """Dibuja todos los elementos del juego"""
         if getattr(self, "fondo_img", None):
             self.ventana.blit(p.transform.scale(self.fondo_img, (ANCHO, ALTO)), (0, 0))
@@ -349,7 +375,9 @@ class Juego:
         
         p.display.flip()
     
-    def dibujar_cuadricula(self):
+    # Parametros: ninguno
+    # Retorno: None
+    def dibujar_cuadricula(self):   # Rejilla decorativa del fondo
         """Dibuja una cuadricula de fondo"""
         tamaño_grid = 40
         
@@ -359,7 +387,9 @@ class Juego:
         for y in range(0, ALTO, tamaño_grid):
             p.draw.line(self.ventana, GRIS_OSCURO, (0, y), (ANCHO, y))
     
-    def dibujar_barra_vida(self, x, y, vida, vida_max):
+    # Parametros: x,y (int), vida (int), vida_max (int)
+    # Retorno: None
+    def dibujar_barra_vida(self, x, y, vida, vida_max):   # Barra roja/verde
         """Dibuja una barra de vida"""
         ancho_barra = 50
         alto_barra = 5
@@ -369,7 +399,9 @@ class Juego:
         vida_porcentaje = (vida / vida_max) * ancho_barra
         p.draw.rect(self.ventana, VERDE, (x, y, vida_porcentaje, alto_barra))
     
-    def dibujar_hud(self):
+    # Parametros: ninguno
+    # Retorno: None
+    def dibujar_hud(self):   # Textos: score, vida, nivel, enemigos
         """Dibuja la interfaz del juego"""
         score_text = FUENTE_HUD.render(f"Score: {self.score}/{self.objetivo_puntos}", True, AMARILLO)
         self.ventana.blit(score_text, (10, 10))
@@ -386,7 +418,9 @@ class Juego:
         ayuda_text = FUENTE_PEQUENA.render("SPACE: Disparar | ARROWS: Mover | ESC: MENU", True, BLANCO)
         self.ventana.blit(ayuda_text, (10, ALTO - 30))
     
-    def dibujar_victoria(self):
+    # Parametros: ninguno
+    # Retorno: None
+    def dibujar_victoria(self):   # Overlay y texto de victoria
         """Dibuja la pantalla de victoria"""
         overlay = p.Surface((ANCHO, ALTO))
         overlay.set_alpha(200)
@@ -423,7 +457,9 @@ class Juego:
         # Guardar rect para posible uso en eventos
         self.final_button_rect = p.Rect(btn_x, btn_y, btn_w, btn_h)
     
-    def dibujar_derrota(self):
+    # Parametros: ninguno
+    # Retorno: None
+    def dibujar_derrota(self):   # Overlay y texto de derrota
         """Dibuja la pantalla de derrota"""
         overlay = p.Surface((ANCHO, ALTO))
         overlay.set_alpha(200)
@@ -460,7 +496,9 @@ class Juego:
         # Guardar rect para posible uso en eventos
         self.final_button_rect = p.Rect(btn_x, btn_y, btn_w, btn_h)
     
-    def ejecutar(self):
+    # Parametros: ninguno
+    # Retorno: 'quit'|'niveles'|'menu_inicio'
+    def ejecutar(self):   # Loop principal: juego + espera en finales
         """Bucle principal del juego"""
         reloj = p.time.Clock()
         pantalla_final_esperando = False

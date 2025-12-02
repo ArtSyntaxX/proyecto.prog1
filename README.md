@@ -3,14 +3,13 @@
 ## Como Ejecutar el Juego
 
 ### Opcion 1: Usando run.py (Recomendado)
-```bash
-python run.py
+```powershell
+python ".\run.py"
 ```
 
 ### Opcion 2: Ejecutar main.py directamente desde juego/
-```bash
-cd juego
-python main.py
+```powershell
+Push-Location "juego"; python ".\main.py"; Pop-Location
 ```
 
 ## Requisitos
@@ -18,7 +17,7 @@ python main.py
 - Pygame 2.6.1
 
 ## Instalacion de Dependencias
-```bash
+```powershell
 pip install pygame==2.6.1
 ```
 
@@ -114,18 +113,26 @@ proyecto.prog1/
 El repositorio esta en: https://github.com/ArtSyntaxX/proyecto.prog1
 
 Para actualizar:
-```bash
+```powershell
 git pull origin main
-python run.py
+python ".\run.py"
 ```
 
 Para contribuir:
-```bash
+```powershell
 git checkout -b feature/mi-rama
 # Hacer cambios...
+git add -A
 git commit -m "Descripcion de cambios"
 git push origin feature/mi-rama
 ```
+
+## Documentacion de Estructura
+
+Consulta `DOC_ESTRUCTURA.txt` para una descripcion clara de:
+- Modulos y responsabilidades
+- Clases y metodos con parametros y retornos
+- Flujo de entrada (`run.py` -> `juego.main.main` -> menus -> `Juego.ejecutar()`)
 
 ---
 Juego desarrollado con Pygame | Python 3.13.7

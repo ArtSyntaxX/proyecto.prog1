@@ -1,0 +1,142 @@
+Proyecto: Space Shooter (paquete 'juego')
+
+Resumen de modulos y responsabilidades (ASCII):
+- run.py: punto de entrada simple; importa y ejecuta juego.main.main
+- juego/config.py: constantes y mapas de recursos (NAVES, BALAS, NIVELES, ENEMIGOS, FONDOS)
+- juego/main.py: crea ventana y orquesta menus y juego segun 'estado'
+- juego/menu.py: clases de menus (Menu base + MenuInicio + MenuNiveles + MenuVestuario)
+- juego/juego.py: clase Juego con el loop de juego y renderizado
+
+====================
+Modulo: juego/config.py
+====================
+- Diccionario NAVES[id:int 1..3]: {'nombre', 'velocidad', 'sprite'}
+- Diccionario BALAS[id:int 1..3]: {'nombre', 'daño', 'velocidadB', 'tamaño', 'sprite'}
+- Diccionario NIVELES[id:int 1..5]: {'nombre','enemigos','vida_enemigo','velocidad_enemigo','pueden_disparar','objetivo_puntos'}
+- Diccionario ENEMIGOS[id:int 1..5]: ruta de sprites de enemigos
+- Diccionario FONDOS: claves {'inicio','niveles',1..5} -> rutas de fondos
+- Constantes de colores, tamaños de ventana y fuentes (FUENTE_*)
+
+====================
+Modulo: juego/main.py
+====================
+Funcion main():
+- Proposito: crear ventana pygame y controlar el flujo entre menus y juego
+- Parametros: ninguno
+- Retorno: None (sale al cerrar)
+- Variables clave:
+  - ventana: pygame.Surface principal
+  - estado: 'menu_inicio'|'niveles'|'vestuario'
+  - nave_elegida: id de NAVES (1..3)
+  - bala_elegida: id de BALAS (1..3)
+- Flujo:
+  - estado 'menu_inicio': MenuInicio(ventana) -> manejar_eventos() + dibujar()
+  - estado 'niveles': MenuNiveles(ventana) -> al seleccionar: ("juego",nivel)
+    - Juego(ventana, nivel, nave_elegida, bala_elegida).ejecutar() -> retorna control
+  - estado 'vestuario': MenuVestuario(ventana) -> ('vestuario_completo', nave, bala)
+
+====================
+Modulo: juego/menu.py
+====================
+Clase Menu (base):
+- __init__(ventana)
+  - Param: ventana (pygame.Surface)
+  - Guarda ventana y estado de seleccion
+- dibujar_texto_centrado(texto, fuente, color, y)
+  - Param: texto(str), fuente(Font), color(tuple RGB), y(int)
+  - Retorno: Rect del texto
+- dibujar_opcion(texto, y, seleccionada)
+  - Param: texto(str), y(int), seleccionada(bool)
+  - Retorno: None (dibuja opcion y cuadrado si activa)
+- dibujar_cuadricula_fondo()
+  - Param: ninguno
+  - Retorno: None
+- dibujar_borde_decorativo(x, y, ancho, alto)
+  - Param: x,y(int), ancho,alto(int)
+  - Retorno: None
+
+Clase MenuInicio(Menu):
+- __init__(ventana)
+  - Param: ventana
+  - Define opciones: ["START","VESTUARIO","QUIT"]
+- manejar_eventos()
+  - Param: ninguno
+  - Retorno: 'quit'|'niveles'|'vestuario'|None
+- dibujar()
+  - Param: ninguno
+  - Retorno: None (fondo, titulos, opciones, ayuda)
+
+Clase MenuNiveles(Menu):
+- __init__(ventana)
+  - Param: ventana
+  - Construye opciones desde config.NIVELES y agrega volver
+- manejar_eventos()
+  - Retorno: 'quit'|'menu_inicio'|('juego', nivel)|None
+- dibujar()
+  - Retorno: None (fondo de niveles, titulos, lista)
+
+Clase MenuVestuario(Menu):
+- __init__(ventana)
+  - Carga previews de naves y balas; fase 'nave' -> 'bala'
+- manejar_eventos()
+  - Retorno: 'quit'|'menu_inicio'|('vestuario_completo', nave, bala)|None
+- dibujar()
+  - Retorno: None (fondo, titulos, previews y opciones)
+
+====================
+Modulo: juego/juego.py
+====================
+Clase Juego:
+- __init__(ventana, nivel, nave_tipo, bala_tipo)
+  - Param: ventana(Surface), nivel(int 1..5), nave_tipo(int 1..3), bala_tipo(int 1..3)
+  - Prepara estado del nivel, recursos y contadores
+- cargar_recursos()
+  - Param: ninguno; carga sprites (nave, bala, enemigo), fondo y explosion
+- crear_oleada_enemigos()
+  - Param: ninguno; crea lista de enemigos con velocidad y cooldown
+- manejar_eventos()
+  - Param: ninguno; usa p.event.get()
+  - Retorno: 'quit'|'niveles'|'menu_inicio'|None
+- disparar_jugador()
+  - Param: ninguno; agrega bala si cooldown permite
+- disparar_enemigo(enemigo)
+  - Param: enemigo(dict); agrega bala (dirigida o recta)
+- mover_nave()
+  - Param: ninguno; movimiento limitado al tercio inferior
+- mover_balas()
+  - Param: ninguno; avanza y limpia balas fuera de pantalla
+- mover_enemigos()
+  - Param: ninguno; movimiento y ritmo de disparo por enemigo
+- actualizar_explosiones()
+  - Param: ninguno; avanza frames y elimina terminadas
+- detectar_colisiones()
+  - Param: ninguno; jugador vs balas; balas vs enemigos
+- verificar_victoria()
+  - Retorno: bool; True si score >= objetivo y sin enemigos
+- dibujar()
+  - Param: ninguno; pinta fondo, sprites, HUD y overlays finales
+- dibujar_cuadricula()
+  - Param: ninguno; rejilla decorativa
+- dibujar_barra_vida(x, y, vida, vida_max)
+  - Param: enteros; dibuja barra roja/verde
+- dibujar_hud()
+  - Param: ninguno; texto de score, vida, nivel, enemigos, ayuda
+- dibujar_victoria()/dibujar_derrota()
+  - Param: ninguno; overlays con boton 'VOLVER'
+- ejecutar()
+  - Param: ninguno; loop principal del juego
+  - Retorno: 'quit'|'niveles'|'menu_inicio'
+
+====================
+Entrada y flujo
+====================
+- run.py -> importa juego.main -> llama main()
+- main() crea ventana y usa 'estado' para elegir que menu mostrar
+- Al elegir nivel, main -> construye Juego(...) y llama ejecutar()
+- ejecutar() corre el loop del juego y devuelve a niveles o menu segun final
+
+Notas para nuevos lectores:
+- Todos los "ids" (nave, balas, nivel) se mapean a sus datos en config.py
+- La "ventana" (pygame.Surface) se comparte entre menus y juego para dibujar
+- Los metodos manejar_eventos() leen el teclado/rata con pygame
+- Las funciones que "dibujan" no retornan valor: solo pintan en pantalla
