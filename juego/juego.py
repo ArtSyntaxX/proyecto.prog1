@@ -39,6 +39,9 @@ class Juego:
         # Balas
         self.balas_jugador = []
         self.balas_enemigo = []
+        # Control de disparo (cooldown)
+        self.ultimo_disparo_ms = 0
+        self.disparo_cooldown_ms = 180  # dispara rapido pero no metralleta infinita
         
         # Enemigos
         self.enemigos = []
@@ -66,13 +69,20 @@ class Juego:
         self.bala_img = p.image.load(BALAS[self.bala_tipo]["sprite"]).convert_alpha()
         self.bala_img = p.transform.scale(self.bala_img, bala_size)
         
-        # Enemigo
-        self.enemigo_img = p.image.load(ENEMIGOS["normal"]).convert_alpha()
+        # Enemigo (elige uno según nivel: 1..5)
+        enemigo_tipo = max(1, min(5, self.nivel))
+        self.enemigo_img = p.image.load(ENEMIGOS[enemigo_tipo]).convert_alpha()
         self.enemigo_img = p.transform.scale(self.enemigo_img, (50, 50))
         
-        # Bala enemiga
-        self.bala_enemiga_img = p.image.load(ENEMIGOS["boss"]).convert_alpha()
+        # Bala enemiga (usa recurso dedicado si existe)
+        self.bala_enemiga_img = p.image.load("recursos/enemigos/balaenemigo1.png").convert_alpha()
         self.bala_enemiga_img = p.transform.scale(self.bala_enemiga_img, (10, 15))
+
+        # Fondo del nivel
+        try:
+            self.fondo_img = p.image.load(FONDOS.get(self.nivel, FONDO_OSCURO)).convert()
+        except Exception:
+            self.fondo_img = None
         
         # Explosiones
         self.explosion_imgs = []
@@ -98,7 +108,13 @@ class Juego:
                 "vy": 0,
                 "vida": vida_enemigo,
                 "vida_maxima": vida_enemigo,
-                "contador_disparo": random.randint(50, 150)
+                # Disparo con patrón moderado y variedad visual
+                "contador_disparo": random.randint(60, 140),
+                # Solo algunos apuntan al jugador (p.ej. ~ 1 de cada 3)
+                "apunta_jugador": (i % 3 == 0),
+                # Cooldown variable por enemigo
+                "cooldown_min": random.randint(50, 90),
+                "cooldown_max": random.randint(100, 160)
             }
             self.enemigos.append(enemigo)
     
@@ -140,6 +156,10 @@ class Juego:
     
     def disparar_jugador(self):
         """Crea una bala del jugador"""
+        ahora = p.time.get_ticks()
+        if ahora - self.ultimo_disparo_ms < self.disparo_cooldown_ms:
+            return
+        self.ultimo_disparo_ms = ahora
         bala = {
             "x": self.nave_x + 25,
             "y": self.nave_y,
@@ -154,15 +174,20 @@ class Juego:
         if not self.config_nivel["pueden_disparar"]:
             return
         
-        dx = self.nave_x - enemigo["x"]
-        dy = self.nave_y - enemigo["y"]
-        distancia = math.sqrt(dx**2 + dy**2)
-        
-        if distancia > 0:
-            vx = (dx / distancia) * 3
-            vy = (dy / distancia) * 3
+        # Algunos enemigos apuntan al jugador; otros disparan recto o con ligera desviación
+        if enemigo.get("apunta_jugador", False):
+            dx = self.nave_x - enemigo["x"]
+            dy = self.nave_y - enemigo["y"]
+            distancia = math.sqrt(dx**2 + dy**2)
+            if distancia > 0:
+                vx = (dx / distancia) * 3
+                vy = (dy / distancia) * 3
+            else:
+                vx, vy = 0, 3
         else:
-            vx, vy = 0, 3
+            # Disparo no dirigido: recto hacia abajo con pequeña variación horizontal
+            vx = random.choice([-1, 0, 1])
+            vy = 3
         
         bala = {
             "x": enemigo["x"] + 25,
@@ -176,12 +201,13 @@ class Juego:
     def mover_nave(self):
         """Mueve la nave del jugador"""
         teclas = p.key.get_pressed()
-        
+        # Limite de movimiento: tercio inferior de la pantalla
+        limite_superior_y = ALTO - (ALTO // 3)  # no subir mas alla de este valor
         if teclas[p.K_LEFT] and self.nave_x > 5:
             self.nave_x -= self.velocidad_nave
         if teclas[p.K_RIGHT] and self.nave_x < ANCHO - 55:
             self.nave_x += self.velocidad_nave
-        if teclas[p.K_UP] and self.nave_y > 100:
+        if teclas[p.K_UP] and self.nave_y > limite_superior_y:
             self.nave_y -= self.velocidad_nave
         if teclas[p.K_DOWN] and self.nave_y < ALTO - 85:
             self.nave_y += self.velocidad_nave
@@ -214,7 +240,8 @@ class Juego:
                 enemigo["contador_disparo"] -= 1
                 if enemigo["contador_disparo"] <= 0:
                     self.disparar_enemigo(enemigo)
-                    enemigo["contador_disparo"] = random.randint(60, 120)
+                    # Patrón de ritmo: Pum...Pum (cooldown aleatorio por enemigo)
+                    enemigo["contador_disparo"] = random.randint(enemigo.get("cooldown_min", 60), enemigo.get("cooldown_max", 140))
     
     def actualizar_explosiones(self):
         """Actualiza las animaciones de explosiones"""
@@ -283,7 +310,10 @@ class Juego:
     
     def dibujar(self):
         """Dibuja todos los elementos del juego"""
-        self.ventana.fill(FONDO_OSCURO)
+        if getattr(self, "fondo_img", None):
+            self.ventana.blit(p.transform.scale(self.fondo_img, (ANCHO, ALTO)), (0, 0))
+        else:
+            self.ventana.fill(FONDO_OSCURO)
         
         self.dibujar_cuadricula()
         

@@ -132,8 +132,23 @@ NIVELES = {
     }
 }
 
-# Configuración de enemigos
+# Configuración de enemigos (5 tipos disponibles en recursos/enemigos)
 ENEMIGOS = {
-    "boss": "recursos/enemigos/boss1.png",
-    "normal": "recursos/enemigos/boss1.png"  # Usando la misma por ahora
+    1: "recursos/enemigos/enemigo1.png",
+    2: "recursos/enemigos/enemigo2.png",
+    3: "recursos/enemigos/enemigo3.png",
+    4: "recursos/enemigos/enemigo4.png",
+    5: "recursos/enemigos/enemigo5.png",
+}
+
+# Fondos por pantalla (en recursos/fondos)
+FONDOS = {
+    "inicio": "recursos/fondos/fondostart.png",
+    "niveles": "recursos/fondos/fondoniveles.png",
+    # Por nivel (fondo1..fondo5)
+    1: "recursos/fondos/fondo1.png",
+    2: "recursos/fondos/fondo2.png",
+    3: "recursos/fondos/fondo3.png",
+    4: "recursos/fondos/fondo4.png",
+    5: "recursos/fondos/fondo5.png",
 }

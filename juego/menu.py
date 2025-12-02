@@ -78,8 +78,13 @@ class MenuInicio(Menu):
     
     def dibujar(self):
         """Dibuja el menú de inicio"""
-        self.ventana.fill(FONDO_OSCURO)
-        self.dibujar_cuadricula_fondo()
+        # Fondo de pantalla de inicio
+        try:
+                fondo = p.image.load(FONDOS["inicio"]).convert()
+                self.ventana.blit(p.transform.scale(fondo, (ANCHO, ALTO)), (0, 0))
+        except Exception:
+            self.ventana.fill(FONDO_OSCURO)
+            self.dibujar_cuadricula_fondo()
         
         # Título
         self.dibujar_texto_centrado("SPACE SHOOTER", FUENTE_TITULO, AZUL, 80)
@@ -105,7 +110,7 @@ class MenuInicio(Menu):
             FUENTE_PEQUENA, BLANCO, ALTO - 40)
         
         p.display.flip()
-
+                    except Exception as e:
 
 class MenuNiveles(Menu):
     """Menú para seleccionar uno de los 5 niveles disponibles"""
@@ -142,9 +147,14 @@ class MenuNiveles(Menu):
         return None
     
     def dibujar(self):
-        """Dibuja el menú de selección de niveles"""
-        self.ventana.fill(FONDO_OSCURO)
-        self.dibujar_cuadricula_fondo()
+                    except Exception as e:
+        # Fondo del selector de niveles
+        try:
+                fondo = p.image.load(FONDOS["niveles"]).convert()
+                self.ventana.blit(p.transform.scale(fondo, (ANCHO, ALTO)), (0, 0))
+        except Exception:
+            self.ventana.fill(FONDO_OSCURO)
+            self.dibujar_cuadricula_fondo()
         
         # Títulos
         self.dibujar_texto_centrado("SPACE SHOOTER", FUENTE_TITULO, AZUL, 40)
@@ -180,6 +190,20 @@ class MenuVestuario(Menu):
         self.nave_seleccionada = 1
         self.bala_seleccionada = 1
         self.opcion_seleccionada = 0
+        # Previews de naves y balas
+        self.preview_naves = {}
+        self.preview_balas = {}
+        try:
+            for i in range(1, 4):
+                img = p.image.load(NAVES[i]["sprite"]).convert_alpha()
+                self.preview_naves[i] = p.transform.scale(img, (70, 100))
+            for i in range(1, 4):
+                img = p.image.load(BALAS[i]["sprite"]).convert_alpha()
+                # Escala de bala según tamaño en config
+                tam = BALAS[i]["tamaño"]
+                self.preview_balas[i] = p.transform.scale(img, (max(20, tam[0]), max(40, tam[1])))
+        except Exception:
+            pass
     
     def manejar_eventos(self):
         """Maneja eventos del menú vestuario"""
@@ -229,8 +253,13 @@ class MenuVestuario(Menu):
     
     def dibujar(self):
         """Dibuja el menú de vestuario"""
-        self.ventana.fill(FONDO_OSCURO)
-        self.dibujar_cuadricula_fondo()
+        # Fondo del vestuario: reutiliza fondo de inicio
+        try:
+                fondo = p.image.load(FONDOS["inicio"]).convert()
+                self.ventana.blit(p.transform.scale(fondo, (ANCHO, ALTO)), (0, 0))
+        except Exception:
+            self.ventana.fill(FONDO_OSCURO)
+            self.dibujar_cuadricula_fondo()
         
         y_inicio = 220
         espaciado = 100
@@ -240,7 +269,18 @@ class MenuVestuario(Menu):
             # Títulos
             self.dibujar_texto_centrado("SPACE SHOOTER", FUENTE_TITULO, AZUL, 40)
             self.dibujar_texto_centrado("ELIGE TU NAVE", FUENTE_MENU, VERDE, 120)
-            
+            # Previsualización fila superior de las naves
+            try:
+                base_y = 160
+                pos_x = [ANCHO//2 - 220, ANCHO//2, ANCHO//2 + 220]
+                for i in range(1, 4):
+                    surf = self.preview_naves.get(i)
+                    if surf:
+                        rect = surf.get_rect(center=(pos_x[i-1], base_y))
+                        self.ventana.blit(surf, rect)
+            except Exception:
+                pass
+
             opciones = [
                 f"Nave 1 - {NAVES[1]['nombre']} (Velocidad: {NAVES[1]['velocidad']})",
                 f"Nave 2 - {NAVES[2]['nombre']} (Velocidad: {NAVES[2]['velocidad']})",
@@ -266,6 +306,18 @@ class MenuVestuario(Menu):
             # Info nave seleccionada
             nave_info = f"Nave: {NAVES[self.nave_seleccionada]['nombre']}"
             self.dibujar_texto_centrado(nave_info, FUENTE_PEQUENA, VERDE, 180)
+            
+            # Previsualización fila superior de balas
+            try:
+                base_y = 160
+                pos_x = [ANCHO//2 - 220, ANCHO//2, ANCHO//2 + 220]
+                for i in range(1, 4):
+                    surf = self.preview_balas.get(i)
+                    if surf:
+                        rect = surf.get_rect(center=(pos_x[i-1], base_y))
+                        self.ventana.blit(surf, rect)
+            except Exception:
+                pass
             
             opciones = [
                 f"Balas 1 - {BALAS[1]['nombre']} (Daño: {BALAS[1]['daño']})",
