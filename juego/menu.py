@@ -102,7 +102,7 @@ class MenuInicio(Menu):
         
         # Instrucciones
         self.dibujar_texto_centrado("TAB: Navegar  |  ENTER: Seleccionar", 
-                                   FUENTE_PEQUEÑA, BLANCO, ALTO - 40)
+            FUENTE_PEQUENA, BLANCO, ALTO - 40)
         
         p.display.flip()
 
@@ -166,8 +166,8 @@ class MenuNiveles(Menu):
             self.dibujar_opcion(opcion, y_opcion, i == self.opcion_seleccionada)
         
         # Instrucciones
-        self.dibujar_texto_centrado("TAB/↑↓: Navegar  |  ENTER: Seleccionar  |  ESC: Volver", 
-                                   FUENTE_PEQUEÑA, BLANCO, ALTO - 40)
+        self.dibujar_texto_centrado("TAB/UP-DOWN: Navegar  |  ENTER: Seleccionar  |  ESC: Volver", 
+            FUENTE_PEQUENA, BLANCO, ALTO - 40)
         
         p.display.flip()
 
@@ -265,7 +265,7 @@ class MenuVestuario(Menu):
             
             # Info nave seleccionada
             nave_info = f"Nave: {NAVES[self.nave_seleccionada]['nombre']}"
-            self.dibujar_texto_centrado(nave_info, FUENTE_PEQUEÑA, VERDE, 180)
+            self.dibujar_texto_centrado(nave_info, FUENTE_PEQUENA, VERDE, 180)
             
             opciones = [
                 f"Balas 1 - {BALAS[1]['nombre']} (Daño: {BALAS[1]['daño']})",
@@ -286,6 +286,6 @@ class MenuVestuario(Menu):
         
         # Instrucciones
         self.dibujar_texto_centrado("TAB: Navegar  |  ENTER: Seleccionar  |  ESC: Volver", 
-                                   FUENTE_PEQUEÑA, BLANCO, ALTO - 40)
+            FUENTE_PEQUENA, BLANCO, ALTO - 40)
         
         p.display.flip()

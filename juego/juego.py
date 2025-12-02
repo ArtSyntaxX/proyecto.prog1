@@ -349,7 +349,7 @@ class Juego:
         enemigos_text = FUENTE_HUD.render(f"Enemigos: {len(self.enemigos)}", True, VERDE)
         self.ventana.blit(enemigos_text, (10, 115))
         
-        ayuda_text = FUENTE_PEQUEÑA.render("ESPACIO: Disparar | FLECHAS: Mover | ESC: MENU", True, BLANCO)
+        ayuda_text = FUENTE_PEQUENA.render("SPACE: Disparar | ARROWS: Mover | ESC: MENU", True, BLANCO)
         self.ventana.blit(ayuda_text, (10, ALTO - 30))
     
     def dibujar_victoria(self):

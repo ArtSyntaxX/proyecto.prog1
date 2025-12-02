@@ -27,7 +27,7 @@ p.font.init()
 FUENTE_TITULO = p.font.Font(None, 72)
 FUENTE_MENU = p.font.Font(None, 48)
 FUENTE_TEXTO = p.font.Font(None, 36)
-FUENTE_PEQUEÑA = p.font.Font(None, 24)
+FUENTE_PEQUENA = p.font.Font(None, 24)
 FUENTE_HUD = p.font.Font(None, 28)
 
 # Configuración de naves (3 naves diferentes)
