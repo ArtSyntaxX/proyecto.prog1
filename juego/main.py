@@ -96,8 +96,8 @@ def main():
                         return
                     elif resultado_juego == "niveles":
                         print("◄ Volviendo a MENÚ DE NIVELES después del juego")
-                        # Vuelve al inicio del bucle de niveles sin salir
-                        continue
+                        # Rompe el bucle interior para volver a mostrar el menú de niveles
+                        break
                     else:
                         print("◄ Volviendo a MENÚ PRINCIPAL después del juego")
                         estado = "menu_inicio"
