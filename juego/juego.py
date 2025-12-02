@@ -411,37 +411,48 @@ class Juego:
     def ejecutar(self):
         """Bucle principal del juego"""
         reloj = p.time.Clock()
-        
+
         while self.ejecutandose:
-            # Manejo de eventos
+            # Si estamos en pantalla final, BLOQUEAR y esperar evento
+            if self.victoria or self.vida_nave <= 0:
+                self.dibujar()
+                p.display.flip()
+                
+                # Esperar bloqueante hasta recibir evento
+                while True:
+                    evt = p.event.wait()  # BLOQUEA hasta evento
+                    
+                    if evt.type == p.QUIT:
+                        return "quit"
+                    
+                    if evt.type == p.KEYDOWN:
+                        if evt.key == p.K_RETURN:
+                            return "niveles"
+                        elif evt.key == p.K_ESCAPE:
+                            return "menu_inicio"
+                    
+                    if evt.type == p.MOUSEBUTTONDOWN:
+                        return "niveles"
+            
+            # Manejo de eventos en juego normal
             resultado = self.manejar_eventos()
             if resultado:
                 return resultado
-            
+
             # Lógica del juego
-            if self.vida_nave > 0 and not self.victoria:
+            if self.vida_nave > 0 and not self.victoria: 
                 self.mover_nave()
                 self.mover_balas()
                 self.mover_enemigos()
                 self.actualizar_explosiones()
                 self.detectar_colisiones()
                 self.verificar_victoria()
-            
-            # Pantallas finales
-            if self.victoria or self.vida_nave <= 0:
-                for event in p.event.get():
-                    if event.type == p.QUIT:
-                        return "quit"
-                    if event.type == p.KEYDOWN:
-                        if event.key == p.K_RETURN:
-                            return "niveles"
-                        elif event.key == p.K_ESCAPE:
-                            return "menu_inicio"
-            
+
             # Dibujo
             self.dibujar()
-            
+
             # FPS
             reloj.tick(100)
-        
+
         return "menu_inicio"
+
