@@ -34,7 +34,7 @@ FUENTE_HUD = p.font.Font(None, 28)
 NAVES = {
     1: {
         "sprite": "recursos/ship5.png",
-        "nombre": "Halcón",
+        "nombre": "Halcon",
         "velocidad": 5,
         "color": AZUL,
         "descripcion": "Equilibrada"
@@ -44,11 +44,11 @@ NAVES = {
         "nombre": "Rayo",
         "velocidad": 8,
         "color": AMARILLO,
-        "descripcion": "Rápida"
+        "descripcion": "Rapida"
     },
     3: {
         "sprite": "recursos/nave.png",
-        "nombre": "Titán",
+        "nombre": "Titan",
         "velocidad": 3,
         "color": VERDE,
         "descripcion": "Resistente"
@@ -86,7 +86,7 @@ BALAS = {
 # Niveles (5 niveles con objetivos claros)
 NIVELES = {
     1: {
-        "nombre": "Muy Fácil",
+        "nombre": "Muy Facil",
         "enemigos": 3,
         "vida_enemigo": 2,
         "objetivo_puntos": 30,
@@ -95,7 +95,7 @@ NIVELES = {
         "descripcion": "Aprende los controles"
     },
     2: {
-        "nombre": "Fácil",
+        "nombre": "Facil",
         "enemigos": 5,
         "vida_enemigo": 3,
         "objetivo_puntos": 50,
@@ -113,7 +113,7 @@ NIVELES = {
         "descripcion": "Enemigos se mueven"
     },
     4: {
-        "nombre": "Difícil",
+        "nombre": "Dificil",
         "enemigos": 10,
         "vida_enemigo": 5,
         "objetivo_puntos": 100,
@@ -122,7 +122,7 @@ NIVELES = {
         "descripcion": "Desafío extremo"
     },
     5: {
-        "nombre": "Muy Difícil",
+        "nombre": "Muy Dificil",
         "enemigos": 15,
         "vida_enemigo": 6,
         "objetivo_puntos": 150,
