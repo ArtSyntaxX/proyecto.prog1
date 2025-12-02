@@ -28,8 +28,14 @@ class Menu:
     def dibujar_opcion(self, texto, y, seleccionada):
         """Dibuja una opción del menú con indicador"""
         color = AMARILLO if seleccionada else BLANCO
-        prefijo = "-> " if seleccionada else "  "
-        self.dibujar_texto_centrado(prefijo + texto, FUENTE_MENU, color, y)
+        # Indicador cuadrado discreto a la izquierda de la opción
+        if seleccionada:
+            indicador_w = 12
+            indicador_h = 12
+            indicador_x = ANCHO // 2 - 240
+            indicador_y = y - 12
+            p.draw.rect(self.ventana, CIAN, (indicador_x, indicador_y, indicador_w, indicador_h))
+        self.dibujar_texto_centrado(texto, FUENTE_MENU, color, y)
     
     def dibujar_cuadricula_fondo(self):
         """Dibuja una cuadrícula de fondo"""
@@ -110,7 +116,6 @@ class MenuInicio(Menu):
             FUENTE_PEQUENA, BLANCO, ALTO - 40)
         
         p.display.flip()
-                    except Exception as e:
 
 class MenuNiveles(Menu):
     """Menú para seleccionar uno de los 5 niveles disponibles"""
@@ -147,11 +152,10 @@ class MenuNiveles(Menu):
         return None
     
     def dibujar(self):
-                    except Exception as e:
         # Fondo del selector de niveles
         try:
-                fondo = p.image.load(FONDOS["niveles"]).convert()
-                self.ventana.blit(p.transform.scale(fondo, (ANCHO, ALTO)), (0, 0))
+            fondo = p.image.load(FONDOS["niveles"]).convert()
+            self.ventana.blit(p.transform.scale(fondo, (ANCHO, ALTO)), (0, 0))
         except Exception:
             self.ventana.fill(FONDO_OSCURO)
             self.dibujar_cuadricula_fondo()
@@ -255,8 +259,8 @@ class MenuVestuario(Menu):
         """Dibuja el menú de vestuario"""
         # Fondo del vestuario: reutiliza fondo de inicio
         try:
-                fondo = p.image.load(FONDOS["inicio"]).convert()
-                self.ventana.blit(p.transform.scale(fondo, (ANCHO, ALTO)), (0, 0))
+            fondo = p.image.load(FONDOS["inicio"]).convert()
+            self.ventana.blit(p.transform.scale(fondo, (ANCHO, ALTO)), (0, 0))
         except Exception:
             self.ventana.fill(FONDO_OSCURO)
             self.dibujar_cuadricula_fondo()
@@ -268,16 +272,21 @@ class MenuVestuario(Menu):
         if self.fase == "nave":
             # Títulos
             self.dibujar_texto_centrado("SPACE SHOOTER", FUENTE_TITULO, AZUL, 40)
-            self.dibujar_texto_centrado("ELIGE TU NAVE", FUENTE_MENU, VERDE, 120)
+            self.dibujar_texto_centrado("ELIGE TU NAVE", FUENTE_MENU, VERDE, 140)
             # Previsualización fila superior de las naves
             try:
-                base_y = 160
+                base_y = 200
                 pos_x = [ANCHO//2 - 220, ANCHO//2, ANCHO//2 + 220]
                 for i in range(1, 4):
                     surf = self.preview_naves.get(i)
                     if surf:
                         rect = surf.get_rect(center=(pos_x[i-1], base_y))
                         self.ventana.blit(surf, rect)
+                        # Etiqueta bajo cada preview
+                        nombre = NAVES[i]['nombre']
+                        etiqueta = FUENTE_PEQUENA.render(nombre, True, BLANCO)
+                        etiqueta_rect = etiqueta.get_rect(center=(pos_x[i-1], base_y + 70))
+                        self.ventana.blit(etiqueta, etiqueta_rect)
             except Exception:
                 pass
 
@@ -288,6 +297,8 @@ class MenuVestuario(Menu):
                 "<- Volver al Menú Principal"
             ]
             
+            # Empuja opciones hacia abajo para no colapsar con previews
+            y_inicio = 320
             for i, opcion in enumerate(opciones):
                 y_opcion = y_inicio + i * espaciado
                 
@@ -301,21 +312,25 @@ class MenuVestuario(Menu):
         else:  # fase == "bala"
             # Títulos
             self.dibujar_texto_centrado("SPACE SHOOTER", FUENTE_TITULO, AZUL, 40)
-            self.dibujar_texto_centrado("ELIGE TUS BALAS", FUENTE_MENU, ROJO, 120)
+            self.dibujar_texto_centrado("ELIGE TUS BALAS", FUENTE_MENU, ROJO, 140)
             
             # Info nave seleccionada
             nave_info = f"Nave: {NAVES[self.nave_seleccionada]['nombre']}"
-            self.dibujar_texto_centrado(nave_info, FUENTE_PEQUENA, VERDE, 180)
+            self.dibujar_texto_centrado(nave_info, FUENTE_PEQUENA, VERDE, 210)
             
             # Previsualización fila superior de balas
             try:
-                base_y = 160
+                base_y = 200
                 pos_x = [ANCHO//2 - 220, ANCHO//2, ANCHO//2 + 220]
                 for i in range(1, 4):
                     surf = self.preview_balas.get(i)
                     if surf:
                         rect = surf.get_rect(center=(pos_x[i-1], base_y))
                         self.ventana.blit(surf, rect)
+                        nombre = BALAS[i]['nombre']
+                        etiqueta = FUENTE_PEQUENA.render(nombre, True, BLANCO)
+                        etiqueta_rect = etiqueta.get_rect(center=(pos_x[i-1], base_y + 70))
+                        self.ventana.blit(etiqueta, etiqueta_rect)
             except Exception:
                 pass
             
@@ -326,6 +341,7 @@ class MenuVestuario(Menu):
                 "<- Volver a Elegir Nave"
             ]
             
+            y_inicio = 320
             for i, opcion in enumerate(opciones):
                 y_opcion = y_inicio + i * espaciado
                 
