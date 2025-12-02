@@ -1,18 +1,18 @@
 import pygame as p
-from config import *
-#┌──────────────────────────────────┐
-#│ CLASES DE MENÚS                  │
-#│                                  │
-#│ Menu (clase base)                │
-#│ ├─ MenuInicio                    │
-#│ ├─ MenuNiveles                   │
-#│ └─ MenuVestuario                 │
-#└──────────────────────────────────┘
+from .config import *
+#=================================
+# CLASES DE MENUS
+#
+# Menu (clase base)
+# - MenuInicio
+# - MenuNiveles
+# - MenuVestuario
+#=================================
 
 class Menu:
     #Clase base para todos los menús funncion de funciones de funciones que es usada por las otras clases 
     # líneas definen la clase base Menu 
-    # y sus métodos de dibujo básicos. Es la “caja de herramientas” visual que usan los demás menús
+    # y sus métodos de dibujo básicos. Es la "caja de herramientas" visual que usan los demás menús
     
     def __init__(self, ventana): # ventana q la saca del main
         self.ventana = ventana
@@ -47,24 +47,19 @@ class Menu:
 
 
 class MenuInicio(Menu):
-
-
     """Menú principal con opciones START, VESTUARIO y QUIT"""
     def __init__(self, ventana):
         super().__init__(ventana) # usa el init de la calse menu q es la padre
         self.opciones = ["START", "VESTUARIO", "QUIT"]
         self.opcion_seleccionada = 0
-
-        self.fondo = p.image.load(FONDO_START)
-        self.fondo = p.transform.scale(self.fondo, (ANCHO, ALTO))
     
     def manejar_eventos(self):
         """Maneja eventos del menú inicio"""
         for event in p.event.get():
-            if event.type == p.QUIT:
+            if event.type == p.QUIT:# la x de la ventana 
                 return "quit"
             
-            if event.type == p.KEYDOWN:
+            if event.type == p.KEYDOWN: #entra si un boton es pulsado
                 if event.key == p.K_TAB or event.key == p.K_DOWN:
                     self.opcion_seleccionada = (self.opcion_seleccionada + 1) % len(self.opciones)
                 
@@ -83,12 +78,12 @@ class MenuInicio(Menu):
     
     def dibujar(self):
         """Dibuja el menú de inicio"""
-        self.ventana.blit(self.fondo, (0, 0))
+        self.ventana.fill(FONDO_OSCURO)
         self.dibujar_cuadricula_fondo()
         
         # Título
         self.dibujar_texto_centrado("SPACE SHOOTER", FUENTE_TITULO, AZUL, 80)
-        self.dibujar_texto_centrado("MENÚ PRINCIPAL", FUENTE_MENU, VERDE, 160)
+        self.dibujar_texto_centrado("MENU PRINCIPAL", FUENTE_MENU, VERDE, 160)
         
         # Opciones con recuadro
         y_inicio = 280
@@ -106,7 +101,7 @@ class MenuInicio(Menu):
             self.dibujar_opcion(opcion, y_opcion, i == self.opcion_seleccionada)
         
         # Instrucciones
-        self.dibujar_texto_centrado("TAB/↑↓: Navegar  |  ENTER: Seleccionar", 
+        self.dibujar_texto_centrado("TAB: Navegar  |  ENTER: Seleccionar", 
                                    FUENTE_PEQUEÑA, BLANCO, ALTO - 40)
         
         p.display.flip()
@@ -118,10 +113,8 @@ class MenuNiveles(Menu):
         super().__init__(ventana)
         # Crear opciones dinámicamente desde config
         self.opciones = [f"Nivel {i} - {NIVELES[i]['nombre']}" for i in range(1, 6)]
-        self.opciones.append("◄ Volver al Menú Principal")
+        self.opciones.append("<- Volver al Menú Principal")
         self.opcion_seleccionada = 0
-        self.fondo = p.image.load(FONDO_NIVELES)
-        self.fondo = p.transform.scale(self.fondo, (ANCHO, ALTO))
     
     def manejar_eventos(self):
         """Maneja eventos del menú de niveles"""
@@ -150,7 +143,7 @@ class MenuNiveles(Menu):
     
     def dibujar(self):
         """Dibuja el menú de selección de niveles"""
-        self.ventana.blit(self.fondo, (0, 0))
+        self.ventana.fill(FONDO_OSCURO)
         self.dibujar_cuadricula_fondo()
         
         # Títulos
@@ -187,8 +180,6 @@ class MenuVestuario(Menu):
         self.nave_seleccionada = 1
         self.bala_seleccionada = 1
         self.opcion_seleccionada = 0
-        self.fondo = p.image.load(FONDO_NIVELES)
-        self.fondo = p.transform.scale(self.fondo, (ANCHO, ALTO))
     
     def manejar_eventos(self):
         """Maneja eventos del menú vestuario"""
@@ -238,7 +229,7 @@ class MenuVestuario(Menu):
     
     def dibujar(self):
         """Dibuja el menú de vestuario"""
-        self.ventana.blit(self.fondo, (0, 0))
+        self.ventana.fill(FONDO_OSCURO)
         self.dibujar_cuadricula_fondo()
         
         y_inicio = 220
@@ -254,7 +245,7 @@ class MenuVestuario(Menu):
                 f"Nave 1 - {NAVES[1]['nombre']} (Velocidad: {NAVES[1]['velocidad']})",
                 f"Nave 2 - {NAVES[2]['nombre']} (Velocidad: {NAVES[2]['velocidad']})",
                 f"Nave 3 - {NAVES[3]['nombre']} (Velocidad: {NAVES[3]['velocidad']})",
-                "◄ Volver al Menú Principal"
+                "<- Volver al Menú Principal"
             ]
             
             for i, opcion in enumerate(opciones):
@@ -280,7 +271,7 @@ class MenuVestuario(Menu):
                 f"Balas 1 - {BALAS[1]['nombre']} (Daño: {BALAS[1]['daño']})",
                 f"Balas 2 - {BALAS[2]['nombre']} (Daño: {BALAS[2]['daño']})",
                 f"Balas 3 - {BALAS[3]['nombre']} (Daño: {BALAS[3]['daño']})",
-                "◄ Volver a Elegir Nave"
+                "<- Volver a Elegir Nave"
             ]
             
             for i, opcion in enumerate(opciones):
@@ -294,7 +285,7 @@ class MenuVestuario(Menu):
                 self.dibujar_opcion(opcion, y_opcion, i == self.opcion_seleccionada)
         
         # Instrucciones
-        self.dibujar_texto_centrado("TAB/↑↓: Navegar  |  ENTER: Seleccionar  |  ESC: Volver", 
+        self.dibujar_texto_centrado("TAB: Navegar  |  ENTER: Seleccionar  |  ESC: Volver", 
                                    FUENTE_PEQUEÑA, BLANCO, ALTO - 40)
         
         p.display.flip()

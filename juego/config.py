@@ -1,5 +1,9 @@
 import pygame as p
 
+
+
+# todas las variables globales 
+
 # Dimensiones de ventana
 ANCHO = 600
 ALTO = 800
@@ -130,20 +134,6 @@ NIVELES = {
 
 # Configuración de enemigos
 ENEMIGOS = {
-    1: "recursos/enemigos/enemigo1.png",
-    2: "recursos/enemigos/enemigo2.png",
-    3: "recursos/enemigos/enemigo3.png",
-    4: "recursos/enemigos/enemigo4.png",
-    5: "recursos/enemigos/enemigo5.png"
-}
-BALA_ENEMIGO = "recursos/enemigos/balaenemigo1.png"
-
-FONDO_START = "recursos/fondos/fondostart.png"
-FONDO_NIVELES = "recursos/fondos/fondoniveles.png"
-FONDOS_NIVELES = {
-    1: "recursos/fondos/fondo1.png",
-    2: "recursos/fondos/fondo2.png",
-    3: "recursos/fondos/fondo3.png",
-    4: "recursos/fondos/fondo4.png",
-    5: "recursos/fondos/fondo5.png"
+    "boss": "recursos/enemigos/boss1.png",
+    "normal": "recursos/enemigos/boss1.png"  # Usando la misma por ahora
 }

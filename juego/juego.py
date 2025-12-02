@@ -1,8 +1,8 @@
 import pygame as p
-from config import *
+from .config import *
 import random
 import math
-
+# test para comprobar git
 
 class Juego:
     """Clase principal del juego con enemigos avanzados"""
@@ -12,13 +12,11 @@ class Juego:
         self.nivel = nivel
         self.nave_tipo = nave_tipo
         self.bala_tipo = bala_tipo
-        self.fondo = p.image.load(FONDOS_NIVELES[nivel])
-        self.fondo = p.transform.scale(self.fondo, (ANCHO, ALTO))
         
-        # Configuración del nivel
+        # Configuracion del nivel
         self.config_nivel = NIVELES[nivel]
         
-        # Posición nave jugador
+        # Posicion nave jugador
         self.nave_x = ANCHO // 2 - 25
         self.nave_y = ALTO - 100
         
@@ -30,7 +28,7 @@ class Juego:
         self.vida_nave = 5
         self.vida_maxima = 5
         
-        # Puntuación
+        # Puntuacion
         self.score = 0
         self.objetivo_puntos = self.config_nivel["objetivo_puntos"]
         self.enemigos_derrotados = 0
@@ -54,9 +52,11 @@ class Juego:
         self.victoria = False
         self.contador_victoria = 0
         self.contador_disparo_enemigo = 0
+        # Rect del botón final (se asigna en el dibujo de pantalla final)
+        self.final_button_rect = None
     
     def cargar_recursos(self):
-        """Carga todas las imágenes necesarias"""
+        """Carga todas las imagenes necesarias"""
         # Nave del jugador
         self.nave_img = p.image.load(NAVES[self.nave_tipo]["sprite"]).convert_alpha()
         self.nave_img = p.transform.scale(self.nave_img, (50, 80))
@@ -67,11 +67,11 @@ class Juego:
         self.bala_img = p.transform.scale(self.bala_img, bala_size)
         
         # Enemigo
-        self.enemigo_img = p.image.load(ENEMIGOS[self.nivel]).convert_alpha()
+        self.enemigo_img = p.image.load(ENEMIGOS["normal"]).convert_alpha()
         self.enemigo_img = p.transform.scale(self.enemigo_img, (50, 50))
         
         # Bala enemiga
-        self.bala_enemiga_img = p.image.load(BALA_ENEMIGO).convert_alpha()
+        self.bala_enemiga_img = p.image.load(ENEMIGOS["boss"]).convert_alpha()
         self.bala_enemiga_img = p.transform.scale(self.bala_enemiga_img, (10, 15))
         
         # Explosiones
@@ -86,10 +86,7 @@ class Juego:
         self.enemigos = []
         num_enemigos = self.config_nivel["enemigos"]
         vida_enemigo = self.config_nivel["vida_enemigo"]
-        enemigo_img = p.image.load(ENEMIGOS[self.nivel]).convert_alpha()
-        enemigo_img = p.transform.scale(enemigo_img, (50, 50))
         
-        # Distribuir enemigos en la pantalla
         for i in range(num_enemigos):
             x = (ANCHO // (num_enemigos + 1)) * (i + 1)
             y = 50 + (i % 3) * 80
@@ -110,13 +107,35 @@ class Juego:
         for event in p.event.get():
             if event.type == p.QUIT:
                 return "quit"
-            
+
+            # Si estamos en estado final (victoria/derrota) cualquier tecla
+            # o clic debe devolver al menú de niveles.
+            if self.victoria or self.vida_nave <= 0:
+                # Registro para depuración: entrada a handler final
+                msg = f"[DEBUG] manejar_eventos: estado final detectado, evento: {event.type}\n"
+                print(msg, end="")
+                try:
+                    with open("debug_game.log", "a", encoding="utf-8") as _f:
+                        _f.write(msg)
+                except Exception:
+                    pass
+                if event.type == p.KEYDOWN or event.type == p.MOUSEBUTTONDOWN:
+                    msg2 = "[DEBUG] manejar_eventos: evento final -> volver a niveles\n"
+                    print(msg2, end="")
+                    try:
+                        with open("debug_game.log", "a", encoding="utf-8") as _f:
+                            _f.write(msg2)
+                    except Exception:
+                        pass
+                    return "niveles"
+
+            # En juego activo, procesar controles normales
             if event.type == p.KEYDOWN:
                 if event.key == p.K_SPACE:
                     self.disparar_jugador()
                 elif event.key == p.K_ESCAPE:
                     return "menu_inicio"
-        
+
         return None
     
     def disparar_jugador(self):
@@ -135,7 +154,6 @@ class Juego:
         if not self.config_nivel["pueden_disparar"]:
             return
         
-        # Calcular dirección hacia el jugador
         dx = self.nave_x - enemigo["x"]
         dy = self.nave_y - enemigo["y"]
         distancia = math.sqrt(dx**2 + dy**2)
@@ -170,13 +188,11 @@ class Juego:
     
     def mover_balas(self):
         """Mueve todas las balas"""
-        # Balas del jugador
         for bala in self.balas_jugador[:]:
             bala["y"] += bala["vy"]
             if bala["y"] < 0:
                 self.balas_jugador.remove(bala)
         
-        # Balas del enemigo
         for bala in self.balas_enemigo[:]:
             bala["x"] += bala["vx"]
             bala["y"] += bala["vy"]
@@ -188,15 +204,12 @@ class Juego:
         velocidad_movimiento = self.config_nivel["velocidad_enemigo"]
         
         for enemigo in self.enemigos:
-            # Movimiento horizontal
             if velocidad_movimiento > 0:
                 enemigo["x"] += enemigo["vx"] * velocidad_movimiento
                 
-                # Rebotar en los bordes
                 if enemigo["x"] < 10 or enemigo["x"] > ANCHO - 60:
                     enemigo["vx"] *= -1
             
-            # Disparo
             if self.config_nivel["pueden_disparar"]:
                 enemigo["contador_disparo"] -= 1
                 if enemigo["contador_disparo"] <= 0:
@@ -219,7 +232,6 @@ class Juego:
         """Detecta todas las colisiones"""
         daño_bala = BALAS[self.bala_tipo]["daño"]
         
-        # Colisiones: balas del jugador con enemigos
         for bala in self.balas_jugador[:]:
             for enemigo in self.enemigos[:]:
                 bala_rect = p.Rect(bala["x"], bala["y"], 10, 15)
@@ -235,7 +247,6 @@ class Juego:
                         self.score += 10
                         self.enemigos_derrotados += 1
                         
-                        # Explosión
                         explosion = {
                             "x": enemigo["x"],
                             "y": enemigo["y"],
@@ -246,7 +257,6 @@ class Juego:
                         self.enemigos.remove(enemigo)
                     break
         
-        # Colisiones: balas enemiga con nave
         for bala in self.balas_enemigo[:]:
             nave_rect = p.Rect(self.nave_x, self.nave_y, 50, 80)
             bala_rect = p.Rect(bala["x"], bala["y"], 10, 15)
@@ -255,7 +265,6 @@ class Juego:
                 self.balas_enemigo.remove(bala)
                 self.vida_nave -= 1
                 
-                # Explosión en la nave
                 explosion = {
                     "x": self.nave_x,
                     "y": self.nave_y,
@@ -266,7 +275,7 @@ class Juego:
                 break
     
     def verificar_victoria(self):
-        """Verifica si se alcanzó el objetivo"""
+        """Verifica si se alcanzo el objetivo"""
         if self.score >= self.objetivo_puntos and len(self.enemigos) == 0:
             self.victoria = True
             return True
@@ -274,52 +283,40 @@ class Juego:
     
     def dibujar(self):
         """Dibuja todos los elementos del juego"""
-        # Dibujar fondo del nivel
-        self.ventana.blit(self.fondo, (0, 0))
-
+        self.ventana.fill(FONDO_OSCURO)
         
-        # Cuadrícula de fondo
         self.dibujar_cuadricula()
         
-        # Enemigos
         for enemigo in self.enemigos:
             self.ventana.blit(self.enemigo_img, (enemigo["x"], enemigo["y"]))
             
-            # Barra de vida del enemigo
             self.dibujar_barra_vida(enemigo["x"], enemigo["y"] - 10, 
                                    enemigo["vida"], enemigo["vida_maxima"])
         
-        # Balas del jugador
         for bala in self.balas_jugador:
             self.ventana.blit(self.bala_img, (bala["x"], bala["y"]))
         
-        # Balas del enemigo
         for bala in self.balas_enemigo:
             p.draw.circle(self.ventana, ROJO, (int(bala["x"]), int(bala["y"])), 5)
         
-        # Explosiones
         for explosion in self.explosiones:
             self.ventana.blit(self.explosion_imgs[explosion["frame_actual"]],
                              (explosion["x"], explosion["y"]))
         
-        # Nave del jugador
         self.ventana.blit(self.nave_img, (self.nave_x, self.nave_y))
         
-        # HUD
         self.dibujar_hud()
         
-        # Pantalla de victoria
         if self.victoria:
             self.dibujar_victoria()
         
-        # Pantalla de derrota
         if self.vida_nave <= 0:
             self.dibujar_derrota()
         
         p.display.flip()
     
     def dibujar_cuadricula(self):
-        """Dibuja una cuadrícula de fondo"""
+        """Dibuja una cuadricula de fondo"""
         tamaño_grid = 40
         
         for x in range(0, ANCHO, tamaño_grid):
@@ -333,126 +330,136 @@ class Juego:
         ancho_barra = 50
         alto_barra = 5
         
-        # Fondo rojo
         p.draw.rect(self.ventana, ROJO, (x, y, ancho_barra, alto_barra))
         
-        # Vida en verde
         vida_porcentaje = (vida / vida_max) * ancho_barra
         p.draw.rect(self.ventana, VERDE, (x, y, vida_porcentaje, alto_barra))
     
     def dibujar_hud(self):
         """Dibuja la interfaz del juego"""
-        # Score
-        score_text = FUENTE_HUD.render(f"⭐ Score: {self.score}/{self.objetivo_puntos}", True, AMARILLO)
+        score_text = FUENTE_HUD.render(f"Score: {self.score}/{self.objetivo_puntos}", True, AMARILLO)
         self.ventana.blit(score_text, (10, 10))
         
-        # Vida
-        vida_text = FUENTE_HUD.render(f"❤ Vida: {self.vida_nave}/{self.vida_maxima}", True, ROJO)
+        vida_text = FUENTE_HUD.render(f"Vida: {self.vida_nave}/{self.vida_maxima}", True, ROJO)
         self.ventana.blit(vida_text, (10, 45))
         
-        # Nivel
         nivel_text = FUENTE_HUD.render(f"Nivel {self.nivel}: {self.config_nivel['nombre']}", True, CIAN)
         self.ventana.blit(nivel_text, (10, 80))
         
-        # Enemigos restantes
         enemigos_text = FUENTE_HUD.render(f"Enemigos: {len(self.enemigos)}", True, VERDE)
         self.ventana.blit(enemigos_text, (10, 115))
         
-        # Ayuda
-        ayuda_text = FUENTE_PEQUEÑA.render("ESPACIO: Disparar | FLECHAS: Mover | ESC: Menú", True, BLANCO)
+        ayuda_text = FUENTE_PEQUEÑA.render("ESPACIO: Disparar | FLECHAS: Mover | ESC: MENU", True, BLANCO)
         self.ventana.blit(ayuda_text, (10, ALTO - 30))
     
     def dibujar_victoria(self):
         """Dibuja la pantalla de victoria"""
-        # Fondo semi-transparente
         overlay = p.Surface((ANCHO, ALTO))
         overlay.set_alpha(200)
         overlay.fill(NEGRO)
         self.ventana.blit(overlay, (0, 0))
         
-        # Texto de victoria
-        victoria_text = FUENTE_TITULO.render("¡VICTORIA!", True, VERDE)
+        victoria_text = FUENTE_TITULO.render("VICTORIA", True, VERDE)
         rect = victoria_text.get_rect(center=(ANCHO // 2, ALTO // 2 - 100))
         self.ventana.blit(victoria_text, rect)
         
-        # Información
-        info_text = FUENTE_MENU.render(f"Puntuación: {self.score}", True, AMARILLO)
+        info_text = FUENTE_MENU.render(f"SCORE: {self.score}", True, AMARILLO)
         rect = info_text.get_rect(center=(ANCHO // 2, ALTO // 2))
         self.ventana.blit(info_text, rect)
         
-        # Instrucciones
-        instruc_text = FUENTE_TEXTO.render("ENTER: Volver a niveles | ESC: Menú", True, BLANCO)
-        rect = instruc_text.get_rect(center=(ANCHO // 2, ALTO // 2 + 100))
+        # Texto informativo (seguro): también dibujamos un botón "VOLVER"
+        instruc_text = FUENTE_TEXTO.render("Pulsa cualquier tecla o clic -> VOLVER", True, BLANCO)
+        rect = instruc_text.get_rect(center=(ANCHO // 2, ALTO // 2 + 60))
         self.ventana.blit(instruc_text, rect)
+
+        # Botón visible para volver
+        btn_w, btn_h = 220, 60
+        btn_x = ANCHO // 2 - btn_w // 2
+        btn_y = ALTO // 2 + 90
+        mouse_pos = p.mouse.get_pos()
+        hover = p.Rect(btn_x, btn_y, btn_w, btn_h).collidepoint(mouse_pos)
+        btn_color = GRIS_CLARO if hover else GRIS_OSCURO
+        p.draw.rect(self.ventana, btn_color, (btn_x, btn_y, btn_w, btn_h))
+        p.draw.rect(self.ventana, CIAN, (btn_x, btn_y, btn_w, btn_h), 2)
+
+        btn_text = FUENTE_MENU.render("VOLVER", True, BLANCO)
+        btn_rect = btn_text.get_rect(center=(ANCHO // 2, btn_y + btn_h // 2))
+        self.ventana.blit(btn_text, btn_rect)
+
+        # Guardar rect para posible uso en eventos
+        self.final_button_rect = p.Rect(btn_x, btn_y, btn_w, btn_h)
     
     def dibujar_derrota(self):
         """Dibuja la pantalla de derrota"""
-        # Fondo semi-transparente
         overlay = p.Surface((ANCHO, ALTO))
         overlay.set_alpha(200)
         overlay.fill(NEGRO)
         self.ventana.blit(overlay, (0, 0))
-        
-        # Texto de derrota
-        derrota_text = FUENTE_TITULO.render("¡DERROTA!", True, ROJO)
+
+        derrota_text = FUENTE_TITULO.render("DERROTA", True, ROJO)
         rect = derrota_text.get_rect(center=(ANCHO // 2, ALTO // 2 - 100))
         self.ventana.blit(derrota_text, rect)
-        
-        # Información
-        info_text = FUENTE_MENU.render(f"Puntuación: {self.score}", True, AMARILLO)
+
+        info_text = FUENTE_MENU.render(f"SCORE: {self.score}", True, AMARILLO)
         rect = info_text.get_rect(center=(ANCHO // 2, ALTO // 2))
         self.ventana.blit(info_text, rect)
-        
-        # Instrucciones
-        instruc_text = FUENTE_TEXTO.render("ENTER: Reintentar | ESC: Menú", True, BLANCO)
-        rect = instruc_text.get_rect(center=(ANCHO // 2, ALTO // 2 + 100))
+
+        # Texto informativo (seguro): también dibujamos un botón "VOLVER"
+        instruc_text = FUENTE_TEXTO.render("PULSA UNA TECLA O CLIC EN 'VOLVER'", True, BLANCO)
+        rect = instruc_text.get_rect(center=(ANCHO // 2, ALTO // 2 + 60))
         self.ventana.blit(instruc_text, rect)
+
+        # Botón visible para volver
+        btn_w, btn_h = 220, 60
+        btn_x = ANCHO // 2 - btn_w // 2
+        btn_y = ALTO // 2 + 90
+        mouse_pos = p.mouse.get_pos()
+        hover = p.Rect(btn_x, btn_y, btn_w, btn_h).collidepoint(mouse_pos)
+        btn_color = GRIS_CLARO if hover else GRIS_OSCURO
+        p.draw.rect(self.ventana, btn_color, (btn_x, btn_y, btn_w, btn_h))
+        p.draw.rect(self.ventana, CIAN, (btn_x, btn_y, btn_w, btn_h), 2)
+
+        btn_text = FUENTE_MENU.render("VOLVER", True, BLANCO)
+        btn_rect = btn_text.get_rect(center=(ANCHO // 2, btn_y + btn_h // 2))
+        self.ventana.blit(btn_text, btn_rect)
+
+        # Guardar rect para posible uso en eventos
+        self.final_button_rect = p.Rect(btn_x, btn_y, btn_w, btn_h)
     
     def ejecutar(self):
         """Bucle principal del juego"""
         reloj = p.time.Clock()
-
+        pantalla_final_esperando = False
+        
         while self.ejecutandose:
-            # Si estamos en pantalla final, BLOQUEAR y esperar evento
-            if self.victoria or self.vida_nave <= 0:
+            # Si estamos en pantalla final, esperar a cualquier evento (tecla o click)
+            if (self.victoria or self.vida_nave <= 0) and not pantalla_final_esperando:
+                pantalla_final_esperando = True
                 self.dibujar()
                 p.display.flip()
                 
-                # Esperar bloqueante hasta recibir evento
+                # Bloquear y esperar evento en pantalla final
                 while True:
-                    evt = p.event.wait()  # BLOQUEA hasta evento
-                    
+                    evt = p.event.wait()
                     if evt.type == p.QUIT:
                         return "quit"
-                    
-                    if evt.type == p.KEYDOWN:
-                        if evt.key == p.K_RETURN:
-                            return "niveles"
-                        elif evt.key == p.K_ESCAPE:
-                            return "menu_inicio"
-                    
-                    if evt.type == p.MOUSEBUTTONDOWN:
+                    if evt.type == p.KEYDOWN or evt.type == p.MOUSEBUTTONDOWN:
                         return "niveles"
             
-            # Manejo de eventos en juego normal
+            # Gameplay normal
             resultado = self.manejar_eventos()
             if resultado:
                 return resultado
-
-            # Lógica del juego
-            if self.vida_nave > 0 and not self.victoria: 
+            
+            if self.vida_nave > 0 and not self.victoria:
                 self.mover_nave()
                 self.mover_balas()
                 self.mover_enemigos()
                 self.actualizar_explosiones()
                 self.detectar_colisiones()
                 self.verificar_victoria()
-
-            # Dibujo
+            
             self.dibujar()
-
-            # FPS
             reloj.tick(100)
-
+        
         return "menu_inicio"
-
