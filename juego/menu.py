@@ -1,10 +1,20 @@
 import pygame as p
 from config import *
-
+#┌──────────────────────────────────┐
+#│ CLASES DE MENÚS                  │
+#│                                  │
+#│ Menu (clase base)                │
+#│ ├─ MenuInicio                    │
+#│ ├─ MenuNiveles                   │
+#│ └─ MenuVestuario                 │
+#└──────────────────────────────────┘
 
 class Menu:
-    """Clase base para todos los menús"""
-    def __init__(self, ventana):
+    #Clase base para todos los menús funncion de funciones de funciones que es usada por las otras clases 
+    # líneas definen la clase base Menu 
+    # y sus métodos de dibujo básicos. Es la “caja de herramientas” visual que usan los demás menús
+    
+    def __init__(self, ventana): # ventana q la saca del main
         self.ventana = ventana
         self.opcion_seleccionada = 0
         
@@ -18,7 +28,7 @@ class Menu:
     def dibujar_opcion(self, texto, y, seleccionada):
         """Dibuja una opción del menú con indicador"""
         color = AMARILLO if seleccionada else BLANCO
-        prefijo = "► " if seleccionada else "  "
+        prefijo = "-> " if seleccionada else "  "
         self.dibujar_texto_centrado(prefijo + texto, FUENTE_MENU, color, y)
     
     def dibujar_cuadricula_fondo(self):
@@ -41,8 +51,8 @@ class MenuInicio(Menu):
 
     """Menú principal con opciones START, VESTUARIO y QUIT"""
     def __init__(self, ventana):
-        super().__init__(ventana)
-        self.opciones = ["START - Elegir Nivel", "VESTUARIO - Naves y Balas", "QUIT - Salir"]
+        super().__init__(ventana) # usa el init de la calse menu q es la padre
+        self.opciones = ["START", "VESTUARIO", "QUIT"]
         self.opcion_seleccionada = 0
 
         self.fondo = p.image.load(FONDO_START)
