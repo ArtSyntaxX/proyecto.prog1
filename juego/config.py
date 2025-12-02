@@ -79,12 +79,12 @@ BALAS = {
         "tamaño": (15, 35)
     },
     3: {
-        "sprite": "recursos/bala2.png",
-        "nombre": "Explosiva",
-        "daño": 3,
-        "velocidadB": 5,
-        "color": ROJO,
-        "tamaño": (20, 40)
+        "sprite": "recursos/bullet.png",
+        "nombre": "Bullet",
+        "daño": 2,
+        "velocidadB": 9,
+        "color": AZUL,
+        "tamaño": (12, 30)
     }
 }
 

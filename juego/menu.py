@@ -222,14 +222,19 @@ class MenuVestuario(Menu):  # Dos fases: elegir nave y luego balas
         self.preview_naves = {}
         self.preview_balas = {}
         try:
+            # Previews de naves: tamaño fijo 70x100
             for i in range(1, 4):
                 img = p.image.load(NAVES[i]["sprite"]).convert_alpha()
-                self.preview_naves[i] = p.transform.scale(img, (70, 100))
+                self.preview_naves[i] = p.transform.smoothscale(img, (70, 100))
+            # Previews de balas: preservar aspecto dentro de caja max 30x60
             for i in range(1, 4):
                 img = p.image.load(BALAS[i]["sprite"]).convert_alpha()
-                # Escala de bala según tamaño en config
-                tam = BALAS[i]["tamaño"]
-                self.preview_balas[i] = p.transform.scale(img, (max(20, tam[0]), max(40, tam[1])))
+                max_w, max_h = 30, 60
+                ow, oh = img.get_size()
+                escala = min(max_w / ow, max_h / oh)
+                nw = max(8, int(ow * escala))
+                nh = max(12, int(oh * escala))
+                self.preview_balas[i] = p.transform.smoothscale(img, (nw, nh))
         except Exception:
             pass
     
