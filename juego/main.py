@@ -1,7 +1,7 @@
 import pygame as p
-from config import *
-from menu import MenuInicio, MenuNiveles, MenuVestuario
-from juego import Juego
+from .config import *
+from .menu import MenuInicio, MenuNiveles, MenuVestuario
+from .juego import Juego
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning)
 
