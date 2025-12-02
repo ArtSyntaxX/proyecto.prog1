@@ -41,7 +41,7 @@ def main():
     while True:
         # ========== MENÚ INICIO ==========
         if estado == "menu_inicio":
-            print("\n→ Entrando a MENÚ PRINCIPAL")
+            print("[*] Entrando a MENU PRINCIPAL")
             menu = MenuInicio(ventana)
             
             while True:
@@ -49,23 +49,23 @@ def main():
                 menu.dibujar()
                 
                 if resultado == "quit":
-                    print("✓ Cerrando aplicación...")
+                    print("[*] Cerrando aplicacion...")
                     p.quit()
                     return
                 
                 elif resultado == "niveles":
-                    print("→ Navegando a SELECTOR DE NIVELES")
+                    print("[>] Navegando a SELECTOR DE NIVELES")
                     estado = "niveles"
                     break
                 
                 elif resultado == "vestuario":
-                    print("→ Navegando a VESTUARIO")
+                    print("[>] Navegando a VESTUARIO")
                     estado = "vestuario"
                     break
         
         # ========== MENÚ NIVELES ==========
         elif estado == "niveles":
-            print(f"\n→ Menú de Niveles (Nave: {NAVES[nave_elegida]['nombre']}, Balas: {BALAS[bala_elegida]['nombre']})")
+            print(f"\n[>] Menu de Niveles (Nave: {NAVES[nave_elegida]['nombre']}, Balas: {BALAS[bala_elegida]['nombre']})")
             menu = MenuNiveles(ventana)
             
             while True:
@@ -73,39 +73,38 @@ def main():
                 menu.dibujar()
                 
                 if resultado == "quit":
-                    print("✓ Cerrando aplicación...")
+                    print("[*] Cerrando aplicacion...")
                     p.quit()
                     return
                 
                 elif resultado == "menu_inicio":
-                    print("◄ Volviendo a MENÚ PRINCIPAL")
+                    print("[<] Volviendo a MENU PRINCIPAL")
                     estado = "menu_inicio"
                     break
                 
                 elif isinstance(resultado, tuple) and resultado[0] == "juego":
                     nivel = resultado[1]
-                    print(f"\n▶ INICIANDO JUEGO - Nivel {nivel}: {NIVELES[nivel]['nombre']}")
+                    print(f"\n[>>] INICIANDO JUEGO - Nivel {nivel}: {NIVELES[nivel]['nombre']}")
                     print(f"   Nave: {NAVES[nave_elegida]['nombre']} | Balas: {BALAS[bala_elegida]['nombre']}")
                     
                     juego = Juego(ventana, nivel, nave_elegida, bala_elegida)
                     resultado_juego = juego.ejecutar()
                     
                     if resultado_juego == "quit":
-                        print("✓ Cerrando aplicación...")
+                        print("[*] Cerrando aplicacion...")
                         p.quit()
                         return
                     elif resultado_juego == "niveles":
-                        print("◄ Volviendo a MENÚ DE NIVELES después del juego")
-                        # Rompe el bucle interior para volver a mostrar el menú de niveles
+                        print("[<] Volviendo a MENU DE NIVELES despues del juego")
                         break
                     else:
-                        print("◄ Volviendo a MENÚ PRINCIPAL después del juego")
+                        print("[<] Volviendo a MENU PRINCIPAL despues del juego")
                         estado = "menu_inicio"
                         break
         
         # ========== MENÚ VESTUARIO ==========
         elif estado == "vestuario":
-            print(f"\n→ Abriendo VESTUARIO")
+            print(f"\n[>] Abriendo VESTUARIO")
             menu = MenuVestuario(ventana)
             
             while True:
@@ -113,22 +112,22 @@ def main():
                 menu.dibujar()
                 
                 if resultado == "quit":
-                    print("✓ Cerrando aplicación...")
+                    print("[*] Cerrando aplicacion...")
                     p.quit()
                     return
                 
                 elif resultado == "menu_inicio":
-                    print("◄ Volviendo a MENÚ PRINCIPAL")
+                    print("[<] Volviendo a MENU PRINCIPAL")
                     estado = "menu_inicio"
                     break
                 
                 elif isinstance(resultado, tuple) and resultado[0] == "vestuario_completo":
                     nave_elegida = resultado[1]
                     bala_elegida = resultado[2]
-                    print(f"✓ Configuración guardada:")
+                    print(f"[OK] Configuracion guardada:")
                     print(f"   Nave: {NAVES[nave_elegida]['nombre']} (Velocidad: {NAVES[nave_elegida]['velocidad']})")
-                    print(f"   Balas: {BALAS[bala_elegida]['nombre']} (Daño: {BALAS[bala_elegida]['daño']})")
-                    print("◄ Volviendo a MENÚ PRINCIPAL")
+                    print(f"   Balas: {BALAS[bala_elegida]['nombre']} (Danio: {BALAS[bala_elegida]['daño']})")
+                    print("[<] Volviendo a MENU PRINCIPAL")
                     estado = "menu_inicio"
                     break
 
