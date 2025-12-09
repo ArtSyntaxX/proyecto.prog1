@@ -1,7 +1,0 @@
-palabra="onomatopella"
-Cres="aol"
-for x in palabra: # i es cada letra 
-    if x in Cres:
-        print(x.upper(),"",end=' ')
-    else:
-        print('__ ',end=' ')
