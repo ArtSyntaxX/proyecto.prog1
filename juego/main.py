@@ -43,7 +43,8 @@ def main():  # Entrada: crea ventana y orquesta menús y juego
     # Bucle principal (decide pantalla según 'estado').
     # Origen: bucle de juego típico de pygame;
     # espera eventos con p.event.get(), dibuja y actualiza pantalla.
-    while True:
+    aplicacion_activa = True  # Variable de control del bucle principal
+    while aplicacion_activa:
         # ========== MENÚ INICIO ==========
         if estado == "menu_inicio":  # Muestra menú principal y navega
             print("[*] Entrando a MENU PRINCIPAL")
