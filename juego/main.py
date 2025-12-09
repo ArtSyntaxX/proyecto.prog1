@@ -47,9 +47,11 @@ def main():  # Entrada: crea ventana y orquesta menús y juego
         # ========== MENÚ INICIO ==========
         if estado == "menu_inicio":  # Muestra menú principal y navega
             print("[*] Entrando a MENU PRINCIPAL")
-            menu = MenuInicio(ventana)  # Parámetro 'ventana' es la superficie de dibujo compartida
+            menu = MenuInicio(ventana)  # Parámetro 'ventana' es la superficie de dibujo compartida el llamamineto entero de esta 
+                                        #Menu inicio siendo una de las funciones q se encuentra en menu.py
             
-            while True:
+            menu_activo = True  # Variable de control del bucle
+            while menu_activo:
                 resultado = menu.manejar_eventos()  # Origen: método de clase MenuInicio (lee teclado/ventana)
                 menu.dibujar()  # Origen: método de clase MenuInicio (pinta fondo/opciones)
                 
@@ -61,19 +63,20 @@ def main():  # Entrada: crea ventana y orquesta menús y juego
                 elif resultado == "niveles":
                     print("[>] Navegando a SELECTOR DE NIVELES")
                     estado = "niveles"  # Cambia estado; el while externo decidirá nueva pantalla
-                    break
+                    menu_activo = False  # Sale del bucle
                 
                 elif resultado == "vestuario":
                     print("[>] Navegando a VESTUARIO")
                     estado = "vestuario"  # Cambia estado para abrir vestuario
-                    break
+                    menu_activo = False  # Sale del bucle
         
         # ========== MENÚ NIVELES ==========
         elif estado == "niveles":  # Selector de niveles y arranque del juego
             print(f"\n[>] Menu de Niveles (Nave: {NAVES[nave_elegida]['nombre']}, Balas: {BALAS[bala_elegida]['nombre']})")
             menu = MenuNiveles(ventana)  # Recibe 'ventana'; construye opciones desde config.NIVELES
             
-            while True:
+            menu_activo = True  # Variable de control del bucle
+            while menu_activo:
                 resultado = menu.manejar_eventos()  # Lee teclas y devuelve acción/tupla
                 menu.dibujar()  # Pinta títulos y lista de niveles
                 
@@ -85,7 +88,7 @@ def main():  # Entrada: crea ventana y orquesta menús y juego
                 elif resultado == "menu_inicio":
                     print("[<] Volviendo a MENU PRINCIPAL")
                     estado = "menu_inicio"
-                    break
+                    menu_activo = False  # Sale del bucle
                 
                 elif isinstance(resultado, tuple) and resultado[0] == "juego":
                     nivel = resultado[1]  # Parámetro 'nivel' (int 1..5) proviene del menú
@@ -105,18 +108,19 @@ def main():  # Entrada: crea ventana y orquesta menús y juego
                         return
                     elif resultado_juego == "niveles":
                         print("[<] Volviendo a MENU DE NIVELES despues del juego")
-                        break
+                        menu_activo = False  # Sale del bucle
                     else:
                         print("[<] Volviendo a MENU PRINCIPAL despues del juego")
                         estado = "menu_inicio"
-                        break
+                        menu_activo = False  # Sale del bucle
         
         # ========== MENÚ VESTUARIO ==========
         elif estado == "vestuario":  # Elegir nave y balas en dos fases
             print(f"\n[>] Abriendo VESTUARIO")
             menu = MenuVestuario(ventana)  # Usa ventana; fase 'nave' y luego 'bala'
             
-            while True:
+            menu_activo = True  # Variable de control del bucle
+            while menu_activo:
                 resultado = menu.manejar_eventos()  # Devuelve tuplas ('vestuario_completo', nave, bala) o navegación
                 menu.dibujar()  # Pinta fondo, previews y opciones
                 
@@ -128,7 +132,7 @@ def main():  # Entrada: crea ventana y orquesta menús y juego
                 elif resultado == "menu_inicio":
                     print("[<] Volviendo a MENU PRINCIPAL")
                     estado = "menu_inicio"
-                    break
+                    menu_activo = False  # Sale del bucle
                 
                 elif isinstance(resultado, tuple) and resultado[0] == "vestuario_completo":
                     nave_elegida = resultado[1]  # Origen: ID elegido en fase de naves (1..3)
@@ -138,7 +142,7 @@ def main():  # Entrada: crea ventana y orquesta menús y juego
                     print(f"   Balas: {BALAS[bala_elegida]['nombre']} (Danio: {BALAS[bala_elegida]['daño']})")
                     print("[<] Volviendo a MENU PRINCIPAL")
                     estado = "menu_inicio"
-                    break
+                    menu_activo = False  # Sale del bucle
 
 
 if __name__ == "__main__":
